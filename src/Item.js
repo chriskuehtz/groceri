@@ -100,9 +100,6 @@ const Item = (props) => {
                 elevation={3}
                 style={{
                   backgroundColor: "white",
-                  width: "90%",
-                  marginLeft: "5%",
-                  minHeight: 95,
                 }}
                 onClick={() => pushFilter(f[0], input)}
               >

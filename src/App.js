@@ -159,7 +159,7 @@ const App = () => {
             <h1>GROCERI</h1>
             <TextField
               variant="outlined"
-              style={{ width: "70%", padding: 10, paddingRight: 0 }}
+              style={{ width: "60%", padding: 10, paddingRight: 0 }}
               type="text"
               name="input"
               placeholder="Input"
