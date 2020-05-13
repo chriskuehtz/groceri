@@ -54,7 +54,6 @@ const Item = (props) => {
         <Grid
           className="ItemMenu"
           style={{
-            minHeight: window.innerHeight + 20,
             backgroundRepeat: "no-repeat",
             backgroundAttachment: "fixed",
           }}
@@ -100,6 +99,9 @@ const Item = (props) => {
                 elevation={3}
                 style={{
                   backgroundColor: "white",
+                  width: "94%",
+                  margin: "3%",
+                  minHeight: 95,
                 }}
                 onClick={() => pushFilter(f[0], input)}
               >
