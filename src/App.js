@@ -17,34 +17,42 @@ const App = () => {
   const load = () => {
     if (filters.length === 0 && list.length === 0) {
       console.log("lets load some data");
-      api.readFilters().then((f) => {
-        console.log("filter received:");
-        console.log(f);
-        setFilters(f.data.filters);
-      });
-      api.readList().then((l) => {
-        if (l.message === "unauthorized") {
-          if (isLocalHost()) {
-            alert(
-              "FaunaDB key is not unauthorized. Make sure you set it in terminal session where you ran `npm start`. Visit http://bit.ly/set-fauna-key for more info"
-            );
-          } else {
-            alert(
-              "FaunaDB key is not unauthorized. Verify the key `FAUNADB_SERVER_SECRET` set in Netlify enviroment variables is correct"
-            );
-          }
-          return false;
-        }
+      api
+        .readFilters()
+        .then((f) => {
+          console.log("filter received:");
+          console.log(f);
+          console.log(f.message);
 
-        console.log("list:");
-        console.log(l);
-        setList(l.data.list);
-      });
+          if (f.data.hasOwnProperty("filters")) setFilters(f.data.filters);
+        })
+        .catch();
+      api
+        .readList()
+        .then((l) => {
+          if (l.message === "unauthorized") {
+            if (isLocalHost()) {
+              alert(
+                "FaunaDB key is not unauthorized. Make sure you set it in terminal session where you ran `npm start`. Visit http://bit.ly/set-fauna-key for more info"
+              );
+            } else {
+              alert(
+                "FaunaDB key is not unauthorized. Verify the key `FAUNADB_SERVER_SECRET` set in Netlify enviroment variables is correct"
+              );
+            }
+            return false;
+          }
+
+          console.log("list:");
+          console.log(l);
+          if (l.data.hasOwnProperty("list")) setList(l.data.list);
+        })
+        .catch();
     }
   };
 
   const handleInput = (event) => {
-    if (event.target.name === "input" && event.target.value !== "") {
+    if (event.target.name === "input") {
       setInput(event.target.value);
     }
   };
@@ -72,15 +80,18 @@ const App = () => {
     console.log(filtersCopy);
     filtersCopy = filtersCopy.map((f) => f.filter((fi) => fi !== filter));
     console.log(filtersCopy.filter((f) => f.includes(categ)));
-    filtersCopy.filter((f) => f.includes(categ))[0].push(filter);
+    filtersCopy.filter((f) => f.includes(categ))[0].push(filter.toLowerCase());
     console.log(filtersCopy);
     setFilters(filtersCopy);
     api.updateFilters(filtersCopy);
   };
 
   const updateList = () => {
-    api.updateList(list.concat(input));
-    setList(list.concat(input));
+    if (input !== "") {
+      let i = input.toLowerCase();
+      api.updateList(list.concat(i));
+      setList(list.concat(i));
+    }
   };
   //function for adding smth with enter
   const keyPressed = (event) => {
@@ -93,6 +104,7 @@ const App = () => {
   };
   const sorted = () => {
     let copyList = [].concat(list);
+    copyList = copyList.map((e) => e.toLowerCase());
     let displayList = [];
     filters.forEach((f) => {
       let temp = [f[0]];
@@ -108,17 +120,7 @@ const App = () => {
     displayList = displayList.reverse();
     return displayList.map((d) =>
       d.length === 1 ? (
-        <Grid item xs={6} lg={3}>
-          <Category
-            name={d[0]}
-            items={d.slice(1)}
-            list={list}
-            deleteEntry={(l) => deleteEntry(l)}
-            filters={filters}
-            pushFilter={(cat, fil) => pushFilter(cat, fil)}
-            changeEntry={(prev, next) => changeEntry(prev, next)}
-          />
-        </Grid>
+        ""
       ) : (
         <Grid item xs={12} lg={3}>
           <Category
@@ -136,7 +138,14 @@ const App = () => {
   };
 
   return (
-    <div className="App" style={{ minHeight: window.innerHeight + 20 }}>
+    <div
+      className="App"
+      style={{
+        minHeight: window.innerHeight + 20,
+        backgroundRepeat: "no-repeat",
+        backgroundAttachment: "fixed",
+      }}
+    >
       {load()}
       <Grid container spacing={2}>
         <Grid item xs={12}>

@@ -13,6 +13,7 @@ exports.handler = (event, context) => {
     .then((response) => {
       console.log("success");
       return {
+        message: "success",
         statusCode: 200,
         body: JSON.stringify(response),
       };
@@ -20,6 +21,7 @@ exports.handler = (event, context) => {
     .catch((error) => {
       console.log("error", error);
       return {
+        message: "failure",
         statusCode: 400,
         body: JSON.stringify(error),
       };
