@@ -141,7 +141,7 @@ const App = () => {
     <div
       className="App"
       style={{
-        minHeight: window.innerHeight + 20,
+        minHeight: "100vh",
         backgroundRepeat: "no-repeat",
         backgroundAttachment: "fixed",
       }}

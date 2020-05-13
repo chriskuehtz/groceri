@@ -54,6 +54,7 @@ const Item = (props) => {
         <Grid
           className="ItemMenu"
           style={{
+            minHeight: "100vh",
             backgroundRepeat: "no-repeat",
             backgroundAttachment: "fixed",
           }}
