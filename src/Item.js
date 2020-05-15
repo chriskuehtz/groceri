@@ -8,6 +8,7 @@ import {
   Dialog,
   Card,
   Grid,
+  Checkbox,
 } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import CloseIcon from "@material-ui/icons/Close";
@@ -16,7 +17,9 @@ import "./Item.css";
 const Item = (props) => {
   const [dialog, setDialog] = useState(false);
   const [input, setInput] = useState(props.name);
+
   const filters = props.filters;
+
   const handleInput = (event) => {
     if (event.target.name === "input") {
       setInput(event.target.value);
@@ -35,6 +38,20 @@ const Item = (props) => {
     props.pushFilter(a, b);
     setDialog(false);
   };
+  const handleWeekly = () => {
+    if (props.weekly === true) {
+      props.setWeeklyList(props.weeklyList.filter((e) => e !== props.name));
+    } else {
+      props.setWeeklyList(props.weeklyList.concat(props.name));
+    }
+  };
+  const handleMonthly = () => {
+    if (props.monthly === true) {
+      props.setMonthlyList(props.monthlyList.filter((e) => e !== props.name));
+    } else {
+      props.setMonthlyList(props.monthlyList.concat(props.name));
+    }
+  };
 
   return (
     <ButtonGroup
@@ -51,66 +68,87 @@ const Item = (props) => {
       </Button>
 
       <Dialog fullScreen open={dialog} onClose={() => setDialog(false)}>
-        <Grid
-          className="ItemMenu"
-          style={{
-            minHeight: "100vh",
-            backgroundRepeat: "no-repeat",
-            backgroundAttachment: "fixed",
-          }}
-          container
-          spacing={2}
-        >
-          <Grid item xs={10}>
-            <Card
-              elevation={3}
-              style={{
-                margin: 10,
-                backgroundColor: "#FAFAFA",
-              }}
-            >
-              <TextField
-                variant="outlined"
-                style={{ width: "70%", padding: 10, paddingRight: 0 }}
-                type="text"
-                name="input"
-                placeholder="Input"
-                value={input}
-                onChange={(event) => handleInput(event)}
-              />
-            </Card>
-          </Grid>
-          <Grid item xs={2}>
-            <IconButton
-              style={{
-                backgroundColor: "white",
-                position: "absolute",
-                right: "3vw",
-                top: "3vw",
-              }}
-              onClick={() => changeEntry()}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Grid>
-
-          {filters.map((f) => (
-            <Grid item xs={6} md={3}>
+        <div className="ItemMenu">
+          <Grid
+            style={{
+              minHeight: "100vh",
+              backgroundRepeat: "no-repeat",
+              backgroundAttachment: "fixed",
+            }}
+            container
+            spacing={2}
+          >
+            <Grid item xs={10}>
               <Card
                 elevation={3}
                 style={{
-                  backgroundColor: "white",
-                  width: "94%",
-                  margin: "3%",
-                  minHeight: 95,
+                  margin: 10,
+                  backgroundColor: "#FAFAFA",
                 }}
-                onClick={() => pushFilter(f[0], input)}
               >
-                <h2 style={{ paddingLeft: 10 }}>{f[0]}</h2>
+                <TextField
+                  variant="outlined"
+                  style={{ width: "70%", padding: 10, paddingRight: 0 }}
+                  type="text"
+                  name="input"
+                  placeholder="Input"
+                  value={input}
+                  onChange={(event) => handleInput(event)}
+                />
+                <p style={{ paddingLeft: 20 }}>
+                  weekly staple
+                  <Checkbox
+                    color="default"
+                    disabled={props.monthly}
+                    checked={props.weekly}
+                    onChange={() => handleWeekly()}
+                    inputProps={{ "aria-label": "primary checkbox" }}
+                  />
+                </p>
+                <p style={{ paddingLeft: 20 }}>
+                  monthly staple
+                  <Checkbox
+                    color="default"
+                    disabled={props.weekly}
+                    checked={props.monthly}
+                    onChange={() => handleMonthly()}
+                    inputProps={{ "aria-label": "primary checkbox" }}
+                  />
+                </p>
               </Card>
             </Grid>
-          ))}
-        </Grid>
+            <Grid item xs={2}>
+              <IconButton
+                style={{
+                  backgroundColor: "white",
+                  position: "absolute",
+                  right: "3vw",
+                  top: "3vw",
+                }}
+                onClick={() => changeEntry()}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Grid>
+
+            {filters.map((f) => (
+              <Grid item xs={6} md={3}>
+                <Card
+                  elevation={3}
+                  style={{
+                    backgroundColor: "white",
+                    width: "94%",
+                    margin: "3%",
+                    minHeight: 95,
+                  }}
+                  onClick={() => pushFilter(f[0], input)}
+                >
+                  <h2 style={{ paddingLeft: 10 }}>{f[0]}</h2>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </div>
       </Dialog>
       <Button
         aria-label="delete"

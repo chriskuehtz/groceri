@@ -9,7 +9,7 @@ exports.handler = (event, context) => {
   });
 
   return client
-    .query(q.Get(q.Match(q.Index("list"))))
+    .query(q.Get(q.Match(q.Index("entries"), "chris")))
     .then((response) => {
       console.log("success");
       return {

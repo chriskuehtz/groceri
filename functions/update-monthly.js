@@ -23,7 +23,7 @@ exports.handler = (event, context) => {
       client
         .query(
           q.Update(q.Ref(q.Collection("entries"), ref), {
-            data: { list: f },
+            data: { monthly: f },
           })
         )
         .then((response) => {

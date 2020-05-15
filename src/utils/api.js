@@ -9,8 +9,8 @@ const create = (data) => {
   });
 };
 
-const readList = () => {
-  return fetch("/.netlify/functions/read-list").then((response) => {
+const read = () => {
+  return fetch("/.netlify/functions/read").then((response) => {
     return response.json();
   });
 };
@@ -40,10 +40,42 @@ const updateFilters = (filters) => {
     return response.json();
   });
 };
+const updateWeeklyList = (weekly) => {
+  console.log("went to /api");
+  console.log(weekly);
+  return fetch(`/.netlify/functions/update-weekly`, {
+    method: "POST",
+    body: JSON.stringify(weekly),
+  }).then((response) => {
+    return response.json();
+  });
+};
+const updateMonthlyList = (monthly) => {
+  console.log("went to /api");
+  console.log(monthly);
+  return fetch(`/.netlify/functions/update-monthly`, {
+    method: "POST",
+    body: JSON.stringify(monthly),
+  }).then((response) => {
+    return response.json();
+  });
+};
+const updateStapleTimer = (t) => {
+  console.log(t);
+  return fetch(`/.netlify/functions/update-stapleTimer`, {
+    method: "POST",
+    body: JSON.stringify(t),
+  }).then((response) => {
+    return response.json();
+  });
+};
 
 export default {
-  readList: readList,
+  read: read,
   updateList: updateList,
   readFilters: readFilters,
   updateFilters: updateFilters,
+  updateWeeklyList: updateWeeklyList,
+  updateMonthlyList: updateMonthlyList,
+  updateStapleTimer: updateStapleTimer,
 };

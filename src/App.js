@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 import api from "./utils/api";
-
 import isLocalHost from "./utils/isLocalHost";
 import "./App.css";
 import Category from "./Category";
@@ -10,44 +9,47 @@ import { Button, TextField, Card, Grid } from "@material-ui/core";
 const App = () => {
   const [input, setInput] = useState("");
   const [list, setList] = useState([]);
-
+  const [weeklyList, setWeeklyList] = useState([]);
+  const [monthlyList, setMonthlyList] = useState([]);
   const [filters, setFilters] = useState([]);
 
   //basically componentdidMount
   const load = () => {
     if (filters.length === 0 && list.length === 0) {
       console.log("lets load some data");
-      api
-        .readFilters()
-        .then((f) => {
-          console.log("filter received:");
-          console.log(f);
-          console.log(f.message);
 
-          if (f.data.hasOwnProperty("filters")) setFilters(f.data.filters);
-        })
-        .catch();
-      api
-        .readList()
-        .then((l) => {
-          if (l.message === "unauthorized") {
-            if (isLocalHost()) {
-              alert(
-                "FaunaDB key is not unauthorized. Make sure you set it in terminal session where you ran `npm start`. Visit http://bit.ly/set-fauna-key for more info"
-              );
-            } else {
-              alert(
-                "FaunaDB key is not unauthorized. Verify the key `FAUNADB_SERVER_SECRET` set in Netlify enviroment variables is correct"
-              );
-            }
-            return false;
+      api.read().then((l) => {
+        if (l.message === "unauthorized") {
+          if (isLocalHost()) {
+            alert(
+              "FaunaDB key is not unauthorized. Make sure you set it in terminal session where you ran `npm start`. Visit http://bit.ly/set-fauna-key for more info"
+            );
+          } else {
+            alert(
+              "FaunaDB key is not unauthorized. Verify the key `FAUNADB_SERVER_SECRET` set in Netlify enviroment variables is correct"
+            );
           }
+          return false;
+        }
 
-          console.log("list:");
-          console.log(l);
-          if (l.data.hasOwnProperty("list")) setList(l.data.list);
-        })
-        .catch();
+        console.log("data:");
+        console.log(l);
+        if (l.data.hasOwnProperty("list")) {
+          setList(l.data.list);
+          setFilters(l.data.filters);
+          setWeeklyList(l.data.weekly);
+          setMonthlyList(l.data.monthly);
+          checkStaples(
+            l.data.weeklyTimer,
+            l.data.monthlyTimer,
+            l.data.weekly,
+            l.data.monthly
+          );
+        } else {
+          console.log("something went wrong");
+          setList(["An error occured, try refreshing the page"]);
+        }
+      });
     }
   };
 
@@ -93,6 +95,45 @@ const App = () => {
       setList(list.concat(i));
     }
   };
+  const handleWeeklyList = (l) => {
+    api.updateWeeklyList(l);
+    setWeeklyList(l);
+  };
+  const handleMonthlyList = (l) => {
+    api.updateMonthlyList(l);
+    setMonthlyList(l);
+  };
+  const checkStaples = (w, m, wl, ml) => {
+    if (
+      (new Date().getTime() - w) / (1000 * 3600 * 24) > 6 &&
+      (new Date().getTime() - m) / (1000 * 3600 * 24) > 29
+    ) {
+      console.log("what a coincidence, weekly and monthly staples at once");
+      api.updateStapleTimer({
+        weekly: new Date().getTime(),
+        monthly: new Date().getTime(),
+      });
+      addStaples(wl.concat(ml));
+    } else if ((new Date().getTime() - w) / (1000 * 3600 * 24) > 6) {
+      console.log("need to add weekly staples");
+      api.updateStapleTimer({ weekly: new Date().getTime(), monthly: m });
+      addStaples(wl);
+    } else if ((new Date().getTime() - m) / (1000 * 3600 * 24) > 29) {
+      console.log("need to add monthly staples");
+      api.updateStapleTimer({ weekly: w, monthly: new Date().getTime() });
+
+      addStaples(ml);
+    } else {
+      console.log("not the time to add any staples");
+    }
+  };
+  const addStaples = (t) => {
+    console.log("t:" + t.join());
+
+    t = t.filter((e) => list.includes(e) === false);
+    console.log(t.join());
+    setList(list.concat(t));
+  };
   //function for adding smth with enter
   const keyPressed = (event) => {
     if (event.key === "Enter" && input !== "" && list.length < 200) {
@@ -131,6 +172,10 @@ const App = () => {
             filters={filters}
             pushFilter={(cat, fil) => pushFilter(cat, fil)}
             changeEntry={(prev, next) => changeEntry(prev, next)}
+            weeklyList={weeklyList}
+            monthlyList={monthlyList}
+            setWeeklyList={(l) => handleWeeklyList(l)}
+            setMonthlyList={(l) => handleMonthlyList(l)}
           />
         </Grid>
       )
@@ -138,16 +183,9 @@ const App = () => {
   };
 
   return (
-    <div
-      className="App"
-      style={{
-        minHeight: "100vh",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
-      }}
-    >
+    <div className="App">
       {load()}
-      <Grid container spacing={2}>
+      <Grid container spacing={2} style={{ marginBottom: 0 }}>
         <Grid item xs={12}>
           <Card
             elevation={3}
