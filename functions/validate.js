@@ -10,14 +10,14 @@ exports.handler = (event, context) => {
   const data = JSON.parse(event.body);
 
   return client
-    .query(q.Get(q.Match(q.Index("users"), data.user, data.password)))
+    .query(q.Get(q.Match(q.Index("u"), data.user)))
     .then((response) => {
       console.log("user and password valid");
       console.log(response);
       return {
         message: "valid",
         statusCode: 200,
-        body: JSON.stringify("validated"),
+        body: JSON.stringify(response.data.hash),
       };
     })
     .catch((error) => {

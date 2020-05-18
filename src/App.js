@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import bcryptjs from "bcryptjs";
 import api from "./utils/api";
 import isLocalHost from "./utils/isLocalHost";
 import "./App.css";
@@ -79,19 +79,24 @@ const App = () => {
     );
   };
   const validate = (u, p) => {
-    //console.log("User: ", u);
-    //console.log("Password: ", p);
-    api.validate(u, p).then((res) => {
-      //console.log(res);
-      if (res === "validated") {
-        //console.log("yippie");
+    console.log("User: ", u);
+    console.log("Password: ", p);
 
+    api.validate(u).then((res) => {
+      if (bcryptjs.compareSync(p, res)) {
         setWarning("");
         setUser(u);
       } else {
         setWarning("incorrect Password or Username");
       }
     });
+  };
+  const hash = () => {
+    let salt = bcryptjs.genSaltSync(10);
+    let hash = bcryptjs.hashSync("eike", salt);
+    let correct = bcryptjs.compareSync("eike", hash); // true
+
+    console.log(hash, correct);
   };
   //basically componentdidMount
   const load = () => {
@@ -286,14 +291,6 @@ const App = () => {
 
   return (
     <div className="App">
-      <Staples
-        weeklyList={weeklyList}
-        monthlyList={monthlyList}
-        staples={staplesdialog}
-        setWeeklyList={(l) => handleWeeklyList(l)}
-        setMonthlyList={(l) => handleMonthlyList(l)}
-        setStaples={(f) => setStaplesdialog(f)}
-      />
       {user !== "" ? (
         <div>
           {load()}
@@ -357,6 +354,14 @@ const App = () => {
             </Grid>
             {sorted()}
           </Grid>
+          <Staples
+            weeklyList={weeklyList}
+            monthlyList={monthlyList}
+            staples={staplesdialog}
+            setWeeklyList={(l) => handleWeeklyList(l)}
+            setMonthlyList={(l) => handleMonthlyList(l)}
+            setStaples={(f) => setStaplesdialog(f)}
+          />
         </div>
       ) : (
         LoginScreen()
