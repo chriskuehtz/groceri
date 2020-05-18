@@ -42,7 +42,7 @@ const App = () => {
                   backgroundColor: "#FAFAFA",
                 }}
               >
-                <h1>GROCERI</h1>
+                <h1 style={{ paddingLeft: 10 }}>GROCERI</h1>
 
                 <p style={{ color: "red" }}>{warning}</p>
                 <TextField
@@ -303,7 +303,7 @@ const App = () => {
                   backgroundColor: "#FAFAFA",
                 }}
               >
-                <h1>GROCERI</h1>
+                <h1 style={{ paddingLeft: 10 }}>GROCERI</h1>
                 <Button
                   style={{ marginLeft: 0, margin: 10, height: 56 }}
                   variant="outlined"
