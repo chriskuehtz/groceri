@@ -105,7 +105,9 @@ const Staples = (props) => {
                   <Button
                     aria-label="delete"
                     onClick={() =>
-                      props.setWeeklyList(props.weekly.filter((e) => e !== w))
+                      props.setWeeklyList(
+                        props.weeklyList.filter((e) => e !== w)
+                      )
                     }
                   >
                     <DeleteIcon />
@@ -149,7 +151,9 @@ const Staples = (props) => {
                   <Button
                     aria-label="delete"
                     onClick={() =>
-                      props.setMonthlyList(props.monthly.filter((e) => e !== m))
+                      props.setMonthlyList(
+                        props.monthlyList.filter((e) => e !== m)
+                      )
                     }
                   >
                     <DeleteIcon />
