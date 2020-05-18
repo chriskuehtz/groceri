@@ -9,8 +9,7 @@ const Category = (props) => {
       elevation={3}
       style={{
         backgroundColor: "white",
-        width: "90%",
-        marginLeft: "5%",
+        margin: 10,
         minHeight: 95,
       }}
     >

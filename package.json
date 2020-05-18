@@ -13,10 +13,10 @@
     "react-scripts": "3.4.1"
   },
   "scripts": {
-    "bootstrap": "netlify dev:exec node ./scripts/bootstrap-fauna-database.js",
+    
     "docs": "md-magic --path '**/*.md' --ignore 'node_modules'",
     "start": "netlify dev",
-    "prebuild": "echo 'setup faunaDB' && npm run bootstrap",
+    
     "build": "react-scripts build"
   },
   "devDependencies": {

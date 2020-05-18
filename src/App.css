@@ -3,3 +3,16 @@
 .App {
   font-family: "Roboto", Times, serif;
 }
+.ItemMenu {
+  font-family: "Roboto", Times, serif;
+
+  background-color: #4f6367;
+}
+.Staples {
+  font-family: "Roboto", Times, serif;
+  background-color: #eef5db;
+}
+.Login {
+  font-family: "Roboto", Times, serif;
+  background-color: #b8d8d8;
+}

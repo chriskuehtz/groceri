@@ -4,7 +4,11 @@ import api from "./utils/api";
 import isLocalHost from "./utils/isLocalHost";
 import "./App.css";
 import Category from "./Category";
-import { Button, TextField, Card, Grid } from "@material-ui/core";
+import Staples from "./Staples";
+import { Dialog, Button, TextField, Card, Grid } from "@material-ui/core";
+//stolen from package.json:
+//"bootstrap": "netlify dev:exec node ./scripts/bootstrap-fauna-database.js",
+//"prebuild": "echo 'setup faunaDB' && npm run bootstrap",
 
 const App = () => {
   const [user, setUser] = useState("");
@@ -16,40 +20,62 @@ const App = () => {
   const [filters, setFilters] = useState([]);
   const [un, setUn] = useState("");
   const [pw, setPW] = useState("");
+  const [staplesdialog, setStaplesdialog] = useState(false);
 
   const LoginScreen = () => {
     return (
-      <Card>
-        <h1>GROCERI</h1>
+      <Dialog fullScreen open={user === ""}>
+        <div className="Login">
+          <Grid
+            style={{
+              minHeight: "102vh",
+              backgroundRepeat: "no-repeat",
+              backgroundAttachment: "fixed",
+            }}
+            container
+            spacing={2}
+          >
+            <Grid item xs={12}>
+              <Card
+                style={{
+                  margin: 10,
+                  backgroundColor: "#FAFAFA",
+                }}
+              >
+                <h1>GROCERI</h1>
 
-        <p style={{ color: "red" }}>{warning}</p>
-        <TextField
-          variant="outlined"
-          style={{ padding: 10 }}
-          type="text"
-          placeholder="Username"
-          value={un}
-          onChange={(event) => setUn(event.target.value)}
-        />
-        <TextField
-          variant="outlined"
-          style={{ padding: 10 }}
-          type="password"
-          placeholder="Password"
-          value={pw}
-          onChange={(event) => setPW(event.target.value)}
-        />
+                <p style={{ color: "red" }}>{warning}</p>
+                <TextField
+                  variant="outlined"
+                  style={{ padding: 10 }}
+                  type="text"
+                  placeholder="Username"
+                  value={un}
+                  onChange={(event) => setUn(event.target.value)}
+                />
+                <TextField
+                  variant="outlined"
+                  style={{ padding: 10 }}
+                  type="password"
+                  placeholder="Password"
+                  value={pw}
+                  onChange={(event) => setPW(event.target.value)}
+                />
 
-        <Button
-          style={{ marginLeft: 0, margin: 10, height: 56 }}
-          variant="outlined"
-          color="dark"
-          disableElevation
-          onClick={() => validate(un, pw)}
-        >
-          Log In
-        </Button>
-      </Card>
+                <Button
+                  style={{ marginLeft: 0, margin: 10, height: 56 }}
+                  variant="outlined"
+                  color="dark"
+                  disableElevation
+                  onClick={() => validate(un, pw)}
+                >
+                  Log In
+                </Button>
+              </Card>
+            </Grid>
+          </Grid>
+        </div>
+      </Dialog>
     );
   };
   const validate = (u, p) => {
@@ -146,7 +172,6 @@ const App = () => {
     setFilters(filtersCopy);
     api.updateFilters(filtersCopy);
   };
-
   const updateList = () => {
     //add an item to the list
     if (list.includes(input)) {
@@ -252,6 +277,14 @@ const App = () => {
 
   return (
     <div className="App">
+      <Staples
+        weeklyList={weeklyList}
+        monthlyList={monthlyList}
+        staples={staplesdialog}
+        setWeeklyList={(l) => handleWeeklyList(l)}
+        setMonthlyList={(l) => handleMonthlyList(l)}
+        setStaples={(f) => setStaplesdialog(f)}
+      />
       {user !== "" ? (
         <div>
           {load()}
@@ -265,6 +298,13 @@ const App = () => {
                 }}
               >
                 <h1>GROCERI</h1>
+                <Button
+                  style={{ marginLeft: 0, margin: 10, height: 56 }}
+                  variant="outlined"
+                  onClick={() => setStaplesdialog(true)}
+                >
+                  Staples
+                </Button>
                 <div
                   stlye={{
                     padding: 10,
@@ -278,8 +318,8 @@ const App = () => {
                   <h3>2.Click on the item to assign it to a filter category</h3>
                   <h3>3.Groceri remembers your filters</h3>
                   <h3>
-                    4.Weekly/Monthly staples get added to your list
-                    automatically every 7/30 days
+                    4.All weekly/monthly staples that are not on the list get
+                    added automatically every 7/30 days
                   </h3>
                 </div>
                 <p style={{ color: "red" }}>{warning}</p>

@@ -12,7 +12,7 @@ exports.handler = (event, context) => {
   return client
     .query(q.Get(q.Match(q.Index("entries"), u)))
     .then((response) => {
-      console.log("success");
+      console.log("read success");
       return {
         message: "success",
         statusCode: 200,

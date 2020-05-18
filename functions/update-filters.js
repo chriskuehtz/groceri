@@ -16,7 +16,7 @@ exports.handler = (event, context) => {
   return client
     .query(q.Get(q.Match(q.Index("entries"), "chris")))
     .then((response) => {
-      console.log("success");
+      console.log("update filters success");
       console.log(response);
       console.log("id:" + response.ref.id);
       ref = response.ref.id;

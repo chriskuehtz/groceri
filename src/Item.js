@@ -12,7 +12,7 @@ import {
 } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
 import CloseIcon from "@material-ui/icons/Close";
-import "./Item.css";
+import "./App.css";
 
 const Item = (props) => {
   const [dialog, setDialog] = useState(false);
@@ -26,10 +26,12 @@ const Item = (props) => {
     }
   };
   const changeEntry = () => {
-    if (input !== "") {
+    if (input !== props.name) {
       props.changeEntry(props.name, input);
       setDialog(false);
       setInput("");
+    } else {
+      setDialog(false);
     }
   };
   const pushFilter = (a, b) => {
@@ -76,11 +78,12 @@ const Item = (props) => {
               minHeight: "100vh",
               backgroundRepeat: "no-repeat",
               backgroundAttachment: "fixed",
+              marginBottom: 50,
             }}
             container
             spacing={2}
           >
-            <Grid item xs={10}>
+            <Grid item xs={12}>
               <Card
                 elevation={3}
                 style={{
@@ -97,6 +100,17 @@ const Item = (props) => {
                   value={input}
                   onChange={(event) => handleInput(event)}
                 />
+                <IconButton
+                  style={{
+                    backgroundColor: "white",
+                    position: "absolute",
+                    right: "3vw",
+                    top: "3vw",
+                  }}
+                  onClick={() => changeEntry()}
+                >
+                  <CloseIcon />
+                </IconButton>
                 <p style={{ paddingLeft: 20 }}>
                   weekly staple
                   <Checkbox
@@ -118,19 +132,6 @@ const Item = (props) => {
                   />
                 </p>
               </Card>
-            </Grid>
-            <Grid item xs={2}>
-              <IconButton
-                style={{
-                  backgroundColor: "white",
-                  position: "absolute",
-                  right: "3vw",
-                  top: "3vw",
-                }}
-                onClick={() => changeEntry()}
-              >
-                <CloseIcon />
-              </IconButton>
             </Grid>
 
             {filters.map((f) => (
