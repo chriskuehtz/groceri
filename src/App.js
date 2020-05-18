@@ -306,12 +306,13 @@ const App = () => {
                   Staples
                 </Button>
                 <div
-                  stlye={{
+                  style={{
                     padding: 10,
                     border: "solid",
                     borderColor: "lightgray",
+                    borderWidth: 1,
                     borderRadius: 10,
-                    color: "red",
+                    margin: 10,
                   }}
                 >
                   <h3>1.Add an Item</h3>
@@ -322,7 +323,7 @@ const App = () => {
                     added automatically every 7/30 days
                   </h3>
                 </div>
-                <p style={{ color: "red" }}>{warning}</p>
+                <p style={{ color: "#FE5F55" }}>{warning}</p>
                 <TextField
                   variant="outlined"
                   style={{ width: "60%", padding: 10, paddingRight: 0 }}
