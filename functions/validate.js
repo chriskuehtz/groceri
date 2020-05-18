@@ -7,16 +7,17 @@ exports.handler = (event, context) => {
   const client = new faunadb.Client({
     secret: process.env.FAUNADB_SERVER_SECRET,
   });
-  const u = JSON.parse(event.body);
+  const data = JSON.parse(event.body);
 
   return client
-    .query(q.Get(q.Match(q.Index("entries"), u)))
+    .query(q.Get(q.Match(q.Index("users"), data.user, data.password)))
     .then((response) => {
-      console.log("success");
+      console.log("user and password valid");
+      console.log(response);
       return {
-        message: "success",
+        message: "valid",
         statusCode: 200,
-        body: JSON.stringify(response),
+        body: JSON.stringify("validated"),
       };
     })
     .catch((error) => {

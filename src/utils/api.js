@@ -1,22 +1,26 @@
 /* Api methods to call /functions */
 
-const create = (data) => {
-  return fetch("/.netlify/functions/todos-create", {
-    body: JSON.stringify(data),
+const validate = (u, p) => {
+  return fetch("/.netlify/functions/validate", {
+    body: JSON.stringify({ user: u, password: p }),
+    method: "POST",
+  }).then((response) => {
+    //console.log(response.json());
+    return response.json();
+  });
+};
+
+const read = (u) => {
+  return fetch("/.netlify/functions/read", {
+    body: JSON.stringify(u),
     method: "POST",
   }).then((response) => {
     return response.json();
   });
 };
-
-const read = () => {
-  return fetch("/.netlify/functions/read").then((response) => {
-    return response.json();
-  });
-};
 const updateList = (list) => {
-  console.log("went to /api");
-  console.log(list);
+  //console.log("went to /api");
+  //console.log(list);
   return fetch(`/.netlify/functions/update-list`, {
     method: "POST",
     body: JSON.stringify(list),
@@ -31,8 +35,8 @@ const readFilters = () => {
   });
 };
 const updateFilters = (filters) => {
-  console.log("went to /api");
-  console.log(filters);
+  //console.log("went to /api");
+  //console.log(filters);
   return fetch(`/.netlify/functions/update-filters`, {
     method: "POST",
     body: JSON.stringify(filters),
@@ -41,8 +45,8 @@ const updateFilters = (filters) => {
   });
 };
 const updateWeeklyList = (weekly) => {
-  console.log("went to /api");
-  console.log(weekly);
+  //console.log("went to /api");
+  //console.log(weekly);
   return fetch(`/.netlify/functions/update-weekly`, {
     method: "POST",
     body: JSON.stringify(weekly),
@@ -51,8 +55,8 @@ const updateWeeklyList = (weekly) => {
   });
 };
 const updateMonthlyList = (monthly) => {
-  console.log("went to /api");
-  console.log(monthly);
+  //console.log("went to /api");
+  //console.log(monthly);
   return fetch(`/.netlify/functions/update-monthly`, {
     method: "POST",
     body: JSON.stringify(monthly),
@@ -61,7 +65,7 @@ const updateMonthlyList = (monthly) => {
   });
 };
 const updateStapleTimer = (t) => {
-  console.log(t);
+  //console.log(t);
   return fetch(`/.netlify/functions/update-stapleTimer`, {
     method: "POST",
     body: JSON.stringify(t),
@@ -72,6 +76,7 @@ const updateStapleTimer = (t) => {
 
 export default {
   read: read,
+  validate: validate,
   updateList: updateList,
   readFilters: readFilters,
   updateFilters: updateFilters,

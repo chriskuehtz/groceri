@@ -29,6 +29,7 @@ const Item = (props) => {
     if (input !== "") {
       props.changeEntry(props.name, input);
       setDialog(false);
+      setInput("");
     }
   };
   const pushFilter = (a, b) => {
@@ -37,6 +38,7 @@ const Item = (props) => {
     }
     props.pushFilter(a, b);
     setDialog(false);
+    setInput("");
   };
   const handleWeekly = () => {
     if (props.weekly === true) {

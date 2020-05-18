@@ -7,18 +7,73 @@ import Category from "./Category";
 import { Button, TextField, Card, Grid } from "@material-ui/core";
 
 const App = () => {
+  const [user, setUser] = useState("");
   const [input, setInput] = useState("");
+  const [warning, setWarning] = useState("");
   const [list, setList] = useState([]);
   const [weeklyList, setWeeklyList] = useState([]);
   const [monthlyList, setMonthlyList] = useState([]);
   const [filters, setFilters] = useState([]);
+  const [un, setUn] = useState("");
+  const [pw, setPW] = useState("");
 
+  const LoginScreen = () => {
+    return (
+      <Card>
+        <h1>GROCERI</h1>
+
+        <p style={{ color: "red" }}>{warning}</p>
+        <TextField
+          variant="outlined"
+          style={{ padding: 10 }}
+          type="text"
+          placeholder="Username"
+          value={un}
+          onChange={(event) => setUn(event.target.value)}
+        />
+        <TextField
+          variant="outlined"
+          style={{ padding: 10 }}
+          type="password"
+          placeholder="Password"
+          value={pw}
+          onChange={(event) => setPW(event.target.value)}
+        />
+
+        <Button
+          style={{ marginLeft: 0, margin: 10, height: 56 }}
+          variant="outlined"
+          color="dark"
+          disableElevation
+          onClick={() => validate(un, pw)}
+        >
+          Log In
+        </Button>
+      </Card>
+    );
+  };
+  const validate = (u, p) => {
+    //console.log("User: ", u);
+    //console.log("Password: ", p);
+    api.validate(u, p).then((res) => {
+      //console.log(res);
+      if (res === "validated") {
+        //console.log("yippie");
+
+        setWarning("");
+        setUser(u);
+      } else {
+        setWarning("incorrect Password or Username");
+      }
+    });
+  };
   //basically componentdidMount
   const load = () => {
+    //load data from fauna
     if (filters.length === 0 && list.length === 0) {
-      console.log("lets load some data");
+      //console.log("lets load some data");
 
-      api.read().then((l) => {
+      api.read(user).then((l) => {
         if (l.message === "unauthorized") {
           if (isLocalHost()) {
             alert(
@@ -32,8 +87,8 @@ const App = () => {
           return false;
         }
 
-        console.log("data:");
-        console.log(l);
+        //console.log("data:");
+        //console.log(l);
         if (l.data.hasOwnProperty("list")) {
           setList(l.data.list);
           setFilters(l.data.filters);
@@ -54,95 +109,108 @@ const App = () => {
   };
 
   const handleInput = (event) => {
+    //handle the input field
     if (event.target.name === "input") {
       setInput(event.target.value);
     }
   };
   const changeEntry = (prev, next) => {
-    console.log("prev:" + prev);
-    console.log("next:" + next);
+    //changes an entry in the list
+    //console.log("prev:" + prev);
+    //console.log("next:" + next);
     let temp = [].concat(list);
     temp = temp.map((t) => {
       if (t === prev) return next;
       else return t;
     });
-    console.log(temp.join());
+    //console.log(temp.join());
     setList(temp);
     api.updateList(temp);
   };
   const deleteEntry = (l) => {
+    //deletes an entry and all duplicates
     setList(l);
     api.updateList(l);
   };
   const pushFilter = (cat, filter) => {
+    //adds a filter
     let categ = cat.toString();
-    console.log("category:" + categ);
-    console.log("filter:" + filter);
+    //console.log("category:" + categ);
+    //console.log("filter:" + filter);
     let filtersCopy = [].concat(filters);
-    console.log(filtersCopy);
+    //console.log(filtersCopy);
     filtersCopy = filtersCopy.map((f) => f.filter((fi) => fi !== filter));
-    console.log(filtersCopy.filter((f) => f.includes(categ)));
+    //console.log(filtersCopy.filter((f) => f.includes(categ)));
     filtersCopy.filter((f) => f.includes(categ))[0].push(filter.toLowerCase());
-    console.log(filtersCopy);
+    //console.log(filtersCopy);
     setFilters(filtersCopy);
     api.updateFilters(filtersCopy);
   };
 
   const updateList = () => {
-    if (input !== "") {
+    //add an item to the list
+    if (list.includes(input)) {
+      setWarning("this item is already on your list");
+    } else if (input !== "" && input.length < 100) {
       let i = input.toLowerCase();
       api.updateList(list.concat(i));
       setList(list.concat(i));
+      setInput("");
+      setWarning("");
+    } else {
+      setWarning("you cannot add a nameless entry");
+    }
+  };
+  const keyPressed = (event) => {
+    //call updatelist by pressing enter in the
+    if (event.key === "Enter") {
+      updateList();
     }
   };
   const handleWeeklyList = (l) => {
+    //update the weekly staples list
     api.updateWeeklyList(l);
     setWeeklyList(l);
   };
   const handleMonthlyList = (l) => {
+    //update the monthly staples list
     api.updateMonthlyList(l);
     setMonthlyList(l);
   };
   const checkStaples = (w, m, wl, ml) => {
+    //compare the current date to the last time staples were added,  trigger addStaples if 7 or 30 days have passed
     if (
       (new Date().getTime() - w) / (1000 * 3600 * 24) > 6 &&
       (new Date().getTime() - m) / (1000 * 3600 * 24) > 29
     ) {
-      console.log("what a coincidence, weekly and monthly staples at once");
+      //console.log("what a coincidence, weekly and monthly staples at once");
       api.updateStapleTimer({
         weekly: new Date().getTime(),
         monthly: new Date().getTime(),
       });
       addStaples(wl.concat(ml));
     } else if ((new Date().getTime() - w) / (1000 * 3600 * 24) > 6) {
-      console.log("need to add weekly staples");
+      //console.log("need to add weekly staples");
       api.updateStapleTimer({ weekly: new Date().getTime(), monthly: m });
       addStaples(wl);
     } else if ((new Date().getTime() - m) / (1000 * 3600 * 24) > 29) {
-      console.log("need to add monthly staples");
+      //console.log("need to add monthly staples");
       api.updateStapleTimer({ weekly: w, monthly: new Date().getTime() });
 
       addStaples(ml);
     } else {
-      console.log("not the time to add any staples");
+      //console.log("not the time to add any staples");
     }
   };
   const addStaples = (t) => {
-    console.log("t:" + t.join());
+    //add the staples to the list, if they are not on it already
+    //console.log("t:" + t.join());
 
     t = t.filter((e) => list.includes(e) === false);
-    console.log(t.join());
+    //console.log(t.join());
     setList(list.concat(t));
   };
-  //function for adding smth with enter
-  const keyPressed = (event) => {
-    if (event.key === "Enter" && input !== "" && list.length < 200) {
-      //if enter is pressed and input is not empty, add input to the list
-      updateList();
-      //empty the input field, so the user can input the next thing
-      setInput("");
-    }
-  };
+
   const sorted = () => {
     let copyList = [].concat(list);
     copyList = copyList.map((e) => e.toLowerCase());
@@ -184,41 +252,65 @@ const App = () => {
 
   return (
     <div className="App">
-      {load()}
-      <Grid container spacing={2} style={{ marginBottom: 0 }}>
-        <Grid item xs={12}>
-          <Card
-            elevation={3}
-            style={{
-              margin: 10,
-              backgroundColor: "#FAFAFA",
-            }}
-          >
-            <h1>GROCERI</h1>
-            <TextField
-              variant="outlined"
-              style={{ width: "60%", padding: 10, paddingRight: 0 }}
-              type="text"
-              name="input"
-              placeholder="Input"
-              value={input}
-              onChange={(event) => handleInput(event)}
-              onKeyPress={keyPressed}
-            />
-            <Button
-              style={{ marginLeft: 0, margin: 10, height: 56 }}
-              size="lg"
-              variant="outlined"
-              color="dark"
-              disableElevation
-              onClick={() => updateList()}
-            >
-              Add
-            </Button>
-          </Card>
-        </Grid>
-        {sorted()}
-      </Grid>
+      {user !== "" ? (
+        <div>
+          {load()}
+          <Grid container spacing={2} style={{ marginBottom: 0 }}>
+            <Grid item xs={12}>
+              <Card
+                elevation={3}
+                style={{
+                  margin: 10,
+                  backgroundColor: "#FAFAFA",
+                }}
+              >
+                <h1>GROCERI</h1>
+                <div
+                  stlye={{
+                    padding: 10,
+                    border: "solid",
+                    borderColor: "lightgray",
+                    borderRadius: 10,
+                    color: "red",
+                  }}
+                >
+                  <h3>1.Add an Item</h3>
+                  <h3>2.Click on the item to assign it to a filter category</h3>
+                  <h3>3.Groceri remembers your filters</h3>
+                  <h3>
+                    4.Weekly/Monthly staples get added to your list
+                    automatically every 7/30 days
+                  </h3>
+                </div>
+                <p style={{ color: "red" }}>{warning}</p>
+                <TextField
+                  variant="outlined"
+                  style={{ width: "60%", padding: 10, paddingRight: 0 }}
+                  type="text"
+                  name="input"
+                  placeholder="add smth"
+                  value={input}
+                  onChange={(event) => handleInput(event)}
+                  onKeyPress={keyPressed}
+                />
+                <Button
+                  style={{ marginLeft: 0, margin: 10, height: 56 }}
+                  size="lg"
+                  variant="outlined"
+                  color="dark"
+                  disableElevation
+                  onClick={() => updateList()}
+                >
+                  Add
+                </Button>
+              </Card>
+            </Grid>
+            {sorted()}
+          </Grid>
+        </div>
+      ) : (
+        LoginScreen()
+      )}
     </div>
   );
 };

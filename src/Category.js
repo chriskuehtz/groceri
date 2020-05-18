@@ -20,7 +20,7 @@ const Category = (props) => {
         let m = false;
         if (props.weeklyList.includes(item)) w = true;
         if (props.monthlyList.includes(item)) m = true;
-        console.log(item + ": weekly:" + w + ", monthly:" + m);
+        //console.log(item + ": weekly:" + w + ", monthly:" + m);
         return (
           <Item
             name={item}
