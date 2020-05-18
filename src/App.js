@@ -146,17 +146,17 @@ const App = () => {
     //console.log("next:" + next);
     let temp = [].concat(list);
     temp = temp.map((t) => {
-      if (t === prev) return next;
+      if (t === prev) return next.toLowerCase();
       else return t;
     });
     //console.log(temp.join());
     setList(temp);
-    api.updateList(temp);
+    api.updateList({ list: temp, u: user });
   };
   const deleteEntry = (l) => {
     //deletes an entry and all duplicates
     setList(l);
-    api.updateList(l);
+    api.updateList({ list: l, u: user });
   };
   const pushFilter = (cat, filter) => {
     //adds a filter
@@ -170,7 +170,7 @@ const App = () => {
     filtersCopy.filter((f) => f.includes(categ))[0].push(filter.toLowerCase());
     //console.log(filtersCopy);
     setFilters(filtersCopy);
-    api.updateFilters(filtersCopy);
+    api.updateFilters({ filters: filtersCopy, u: user });
   };
   const updateList = () => {
     //add an item to the list
@@ -178,7 +178,7 @@ const App = () => {
       setWarning("this item is already on your list");
     } else if (input !== "" && input.length < 100) {
       let i = input.toLowerCase();
-      api.updateList(list.concat(i));
+      api.updateList({ list: list.concat(i), u: user });
       setList(list.concat(i));
       setInput("");
       setWarning("");
@@ -194,12 +194,12 @@ const App = () => {
   };
   const handleWeeklyList = (l) => {
     //update the weekly staples list
-    api.updateWeeklyList(l);
+    api.updateWeeklyList({ weekly: l, u: user });
     setWeeklyList(l);
   };
   const handleMonthlyList = (l) => {
     //update the monthly staples list
-    api.updateMonthlyList(l);
+    api.updateMonthlyList({ monthly: l, u: user });
     setMonthlyList(l);
   };
   const checkStaples = (w, m, wl, ml) => {
@@ -212,15 +212,24 @@ const App = () => {
       api.updateStapleTimer({
         weekly: new Date().getTime(),
         monthly: new Date().getTime(),
+        u: user,
       });
       addStaples(wl.concat(ml));
     } else if ((new Date().getTime() - w) / (1000 * 3600 * 24) > 6) {
       //console.log("need to add weekly staples");
-      api.updateStapleTimer({ weekly: new Date().getTime(), monthly: m });
+      api.updateStapleTimer({
+        weekly: new Date().getTime(),
+        monthly: m,
+        u: user,
+      });
       addStaples(wl);
     } else if ((new Date().getTime() - m) / (1000 * 3600 * 24) > 29) {
       //console.log("need to add monthly staples");
-      api.updateStapleTimer({ weekly: w, monthly: new Date().getTime() });
+      api.updateStapleTimer({
+        weekly: w,
+        monthly: new Date().getTime(),
+        u: user,
+      });
 
       addStaples(ml);
     } else {

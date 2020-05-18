@@ -10,11 +10,11 @@ exports.handler = (event, context) => {
   const client = new faunadb.Client({
     secret: process.env.FAUNADB_SERVER_SECRET,
   });
-  const f = JSON.parse(event.body);
+  const data = JSON.parse(event.body);
   let ref = 0;
 
   return client
-    .query(q.Get(q.Match(q.Index("entries"), "chris")))
+    .query(q.Get(q.Match(q.Index("entries"), data.u)))
     .then((response) => {
       console.log("update filters success");
       console.log(response);
@@ -23,7 +23,7 @@ exports.handler = (event, context) => {
       client
         .query(
           q.Update(q.Ref(q.Collection("entries"), ref), {
-            data: { filters: f },
+            data: { filters: data.filters },
           })
         )
         .then((response) => {

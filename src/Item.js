@@ -32,6 +32,7 @@ const Item = (props) => {
       setInput("");
     } else {
       setDialog(false);
+      setInput("");
     }
   };
   const pushFilter = (a, b) => {
