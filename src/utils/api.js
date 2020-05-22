@@ -9,7 +9,14 @@ const validate = (u) => {
     return response.json();
   });
 };
-
+const changePW = (u) => {
+  return fetch("/.netlify/functions/changePW", {
+    body: JSON.stringify(u),
+    method: "POST",
+  }).then((response) => {
+    return response.json();
+  });
+};
 const read = (u) => {
   return fetch("/.netlify/functions/read", {
     body: JSON.stringify(u),
@@ -18,52 +25,17 @@ const read = (u) => {
     return response.json();
   });
 };
-const updateList = (list) => {
+const update = (l) => {
   //console.log("went to /api");
   //console.log(list);
-  return fetch(`/.netlify/functions/update-list`, {
+  return fetch(`/.netlify/functions/update`, {
     method: "POST",
-    body: JSON.stringify(list),
+    body: JSON.stringify(l),
   }).then((response) => {
     return response.json();
   });
 };
 
-const readFilters = () => {
-  return fetch("/.netlify/functions/read-filters").then((response) => {
-    return response.json();
-  });
-};
-const updateFilters = (filters) => {
-  //console.log("went to /api");
-  //console.log(filters);
-  return fetch(`/.netlify/functions/update-filters`, {
-    method: "POST",
-    body: JSON.stringify(filters),
-  }).then((response) => {
-    return response.json();
-  });
-};
-const updateWeeklyList = (weekly) => {
-  //console.log("went to /api");
-  //console.log(weekly);
-  return fetch(`/.netlify/functions/update-weekly`, {
-    method: "POST",
-    body: JSON.stringify(weekly),
-  }).then((response) => {
-    return response.json();
-  });
-};
-const updateMonthlyList = (monthly) => {
-  //console.log("went to /api");
-  //console.log(monthly);
-  return fetch(`/.netlify/functions/update-monthly`, {
-    method: "POST",
-    body: JSON.stringify(monthly),
-  }).then((response) => {
-    return response.json();
-  });
-};
 const updateStapleTimer = (t) => {
   //console.log(t);
   return fetch(`/.netlify/functions/update-stapleTimer`, {
@@ -73,14 +45,29 @@ const updateStapleTimer = (t) => {
     return response.json();
   });
 };
+const giveFeedback = (f) => {
+  return fetch(`/.netlify/functions/giveFeedback`, {
+    method: "POST",
+    body: JSON.stringify(f),
+  }).then((response) => {
+    return response.json();
+  });
+};
+const showTutorial = (s) => {
+  return fetch(`/.netlify/functions/showTutorial`, {
+    method: "POST",
+    body: JSON.stringify(s),
+  }).then((response) => {
+    return response.json();
+  });
+};
 
 export default {
   read: read,
   validate: validate,
-  updateList: updateList,
-  readFilters: readFilters,
-  updateFilters: updateFilters,
-  updateWeeklyList: updateWeeklyList,
-  updateMonthlyList: updateMonthlyList,
+  update: update,
   updateStapleTimer: updateStapleTimer,
+  giveFeedback: giveFeedback,
+  showTutorial: showTutorial,
+  changePW: changePW,
 };

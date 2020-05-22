@@ -14,20 +14,17 @@ exports.handler = (event, context) => {
   let ref = 0;
 
   return client
-    .query(q.Get(q.Match(q.Index("entries"), data.u)))
+    .query(q.Get(q.Match(q.Index("userrefs"), data.user)))
     .then((response) => {
-      console.log("update filters success");
-      console.log(response);
-      console.log("id:" + response.ref.id);
       ref = response.ref.id;
       client
         .query(
-          q.Update(q.Ref(q.Collection("entries"), ref), {
-            data: { filters: data.filters },
+          q.Update(q.Ref(q.Collection("users"), ref), {
+            data: { hash: data.hash },
           })
         )
         .then((response) => {
-          console.log("success", response);
+          console.log("change PW success", response);
           return {
             message: "success",
             statusCode: 200,

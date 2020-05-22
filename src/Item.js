@@ -65,7 +65,6 @@ const Item = (props) => {
         marginLeft: "5%",
         marginBottom: 5,
       }}
-      color="dark"
       aria-label="dark button group"
     >
       <Button style={{ width: "80%" }} onClick={() => setDialog(true)}>
@@ -135,8 +134,8 @@ const Item = (props) => {
               </Card>
             </Grid>
 
-            {filters.map((f) => (
-              <Grid item xs={6} md={3}>
+            {filters.map((f, i) => (
+              <Grid key={i} item xs={6} md={3}>
                 <Card
                   elevation={3}
                   style={{

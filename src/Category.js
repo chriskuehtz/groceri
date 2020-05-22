@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import Item from "./Item";
-import { Card, ButtonGroup, Button } from "@material-ui/core";
-import DeleteIcon from "@material-ui/icons/Delete";
+import { Card } from "@material-ui/core";
 
 const Category = (props) => {
   return (
@@ -14,7 +13,7 @@ const Category = (props) => {
       }}
     >
       <h2 style={{ paddingLeft: 10 }}>{props.name}</h2>
-      {props.items.map((item) => {
+      {props.items.map((item, i) => {
         let w = false;
         let m = false;
         if (props.weeklyList.includes(item)) w = true;
@@ -22,6 +21,7 @@ const Category = (props) => {
         //console.log(item + ": weekly:" + w + ", monthly:" + m);
         return (
           <Item
+            key={i}
             name={item}
             list={props.list}
             deleteEntry={(l) => props.deleteEntry(l)}

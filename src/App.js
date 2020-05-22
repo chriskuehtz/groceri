@@ -5,10 +5,9 @@ import isLocalHost from "./utils/isLocalHost";
 import "./App.css";
 import Category from "./Category";
 import Staples from "./Staples";
-import { Dialog, Button, TextField, Card, Grid } from "@material-ui/core";
-//stolen from package.json:
-//"bootstrap": "netlify dev:exec node ./scripts/bootstrap-fauna-database.js",
-//"prebuild": "echo 'setup faunaDB' && npm run bootstrap",
+import { Button, TextField, Card, Grid } from "@material-ui/core";
+import LoginScreen from "./LoginScreen";
+import Settings from "./Settings";
 
 const App = () => {
   const [user, setUser] = useState("");
@@ -17,73 +16,27 @@ const App = () => {
   const [list, setList] = useState([]);
   const [weeklyList, setWeeklyList] = useState([]);
   const [monthlyList, setMonthlyList] = useState([]);
+  const [weeklyTimer, setWeeklyTimer] = useState("");
+  const [monthlyTimer, setMonthlyTimer] = useState("");
   const [filters, setFilters] = useState([]);
-  const [un, setUn] = useState("");
-  const [pw, setPW] = useState("");
   const [staplesdialog, setStaplesdialog] = useState(false);
+  const [settingsdialog, setSettingsdialog] = useState(false);
+  const [tutorial, setTutorial] = useState(false);
+  const [ref, setRef] = useState("");
+  const [users, setUsers] = useState("");
 
-  const LoginScreen = () => {
-    return (
-      <Dialog fullScreen open={user === ""}>
-        <div className="Login">
-          <Grid
-            style={{
-              minHeight: "102vh",
-              backgroundRepeat: "no-repeat",
-              backgroundAttachment: "fixed",
-            }}
-            container
-            spacing={2}
-          >
-            <Grid item xs={12}>
-              <Card
-                style={{
-                  margin: 10,
-                  backgroundColor: "#FAFAFA",
-                }}
-              >
-                <h1 style={{ paddingLeft: 10 }}>GROCERI</h1>
-
-                <p style={{ color: "red" }}>{warning}</p>
-                <TextField
-                  variant="outlined"
-                  style={{ padding: 10 }}
-                  type="text"
-                  placeholder="Username"
-                  value={un}
-                  onChange={(event) => setUn(event.target.value)}
-                />
-                <TextField
-                  variant="outlined"
-                  style={{ padding: 10 }}
-                  type="password"
-                  placeholder="Password"
-                  value={pw}
-                  onChange={(event) => setPW(event.target.value)}
-                />
-
-                <Button
-                  style={{ marginLeft: 0, margin: 10, height: 56 }}
-                  variant="outlined"
-                  color="dark"
-                  disableElevation
-                  onClick={() => validate(un, pw)}
-                >
-                  Log In
-                </Button>
-              </Card>
-            </Grid>
-          </Grid>
-        </div>
-      </Dialog>
-    );
+  const setState = (l) => {
+    //console.log(l);
+    setList(l.data.list);
+    setFilters(l.data.filters);
+    setWeeklyList(l.data.weekly);
+    setMonthlyList(l.data.monthly);
+    sorted();
   };
   const validate = (u, p) => {
-    console.log("User: ", u);
-    console.log("Password: ", p);
-
     api.validate(u).then((res) => {
-      if (bcryptjs.compareSync(p, res)) {
+      if (bcryptjs.compareSync(p, res.hash)) {
+        setTutorial(res.tutorial);
         setWarning("");
         setUser(u);
       } else {
@@ -91,54 +44,43 @@ const App = () => {
       }
     });
   };
-  const hash = () => {
-    let salt = bcryptjs.genSaltSync(10);
-    let hash = bcryptjs.hashSync("eike", salt);
-    let correct = bcryptjs.compareSync("eike", hash); // true
-
-    console.log(hash, correct);
+  const showTutorial = () => {
+    setTutorial(false);
+    api.showTutorial({ user: user, tutorial: false });
   };
+
   //basically componentdidMount
   const load = () => {
-    //load data from fauna
-    if (filters.length === 0 && list.length === 0) {
-      //console.log("lets load some data");
-
-      api.read(user).then((l) => {
-        if (l.message === "unauthorized") {
-          if (isLocalHost()) {
-            alert(
-              "FaunaDB key is not unauthorized. Make sure you set it in terminal session where you ran `npm start`. Visit http://bit.ly/set-fauna-key for more info"
-            );
-          } else {
-            alert(
-              "FaunaDB key is not unauthorized. Verify the key `FAUNADB_SERVER_SECRET` set in Netlify enviroment variables is correct"
-            );
-          }
-          return false;
-        }
-
-        //console.log("data:");
-        //console.log(l);
-        if (l.data.hasOwnProperty("list")) {
-          setList(l.data.list);
-          setFilters(l.data.filters);
-          setWeeklyList(l.data.weekly);
-          setMonthlyList(l.data.monthly);
-          checkStaples(
-            l.data.weeklyTimer,
-            l.data.monthlyTimer,
-            l.data.weekly,
-            l.data.monthly
+    api.read(user).then((l) => {
+      if (l.message === "unauthorized") {
+        if (isLocalHost()) {
+          alert(
+            "FaunaDB key is not unauthorized. Make sure you set it in terminal session where you ran `npm start`. Visit http://bit.ly/set-fauna-key for more info"
           );
         } else {
-          console.log("something went wrong");
-          setList(["An error occured, try refreshing the page"]);
+          alert(
+            "FaunaDB key is not unauthorized. Verify the key `FAUNADB_SERVER_SECRET` set in Netlify enviroment variables is correct"
+          );
         }
-      });
-    }
-  };
+        return false;
+      }
 
+      setRef(Object.entries(l.ref)[0][1].id.toString());
+      setList(l.data.list);
+      setFilters(l.data.filters);
+      setWeeklyList(l.data.weekly);
+      setMonthlyList(l.data.monthly);
+      setWeeklyTimer(l.data.weeklyTimer);
+      setMonthlyTimer(l.data.monthlyTimer);
+      setUsers(l.data.users);
+      checkStaples(
+        l.data.weeklyTimer,
+        l.data.monthlyTimer,
+        l.data.weekly,
+        l.data.monthly
+      );
+    });
+  };
   const handleInput = (event) => {
     //handle the input field
     if (event.target.name === "input") {
@@ -155,13 +97,42 @@ const App = () => {
       else return t;
     });
     //console.log(temp.join());
-    setList(temp);
-    api.updateList({ list: temp, u: user });
+    api
+      .update({
+        ref: ref,
+        data: {
+          list: temp,
+          filters: filters,
+          weekly: weeklyList,
+          monthly: monthlyList,
+          weeklyTimer: weeklyTimer,
+          monthlyTimer: monthlyTimer,
+          users: users,
+        },
+      })
+      .then((l) => {
+        setState(l);
+      });
   };
   const deleteEntry = (l) => {
     //deletes an entry and all duplicates
-    setList(l);
-    api.updateList({ list: l, u: user });
+
+    api
+      .update({
+        ref: ref,
+        data: {
+          list: l,
+          filters: filters,
+          weekly: weeklyList,
+          monthly: monthlyList,
+          weeklyTimer: weeklyTimer,
+          monthlyTimer: monthlyTimer,
+          users: users,
+        },
+      })
+      .then((l) => {
+        setState(l);
+      });
   };
   const pushFilter = (cat, filter) => {
     //adds a filter
@@ -174,8 +145,23 @@ const App = () => {
     //console.log(filtersCopy.filter((f) => f.includes(categ)));
     filtersCopy.filter((f) => f.includes(categ))[0].push(filter.toLowerCase());
     //console.log(filtersCopy);
-    setFilters(filtersCopy);
-    api.updateFilters({ filters: filtersCopy, u: user });
+
+    api
+      .update({
+        ref: ref,
+        data: {
+          list: list,
+          filters: filtersCopy,
+          weekly: weeklyList,
+          monthly: monthlyList,
+          weeklyTimer: weeklyTimer,
+          monthlyTimer: monthlyTimer,
+          users: users,
+        },
+      })
+      .then((l) => {
+        setState(l);
+      });
   };
   const updateList = () => {
     //add an item to the list
@@ -183,8 +169,23 @@ const App = () => {
       setWarning("this item is already on your list");
     } else if (input !== "" && input.length < 100) {
       let i = input.toLowerCase();
-      api.updateList({ list: list.concat(i), u: user });
-      setList(list.concat(i));
+      let temp = list.concat(i);
+      api
+        .update({
+          ref: ref,
+          data: {
+            list: temp,
+            filters: filters,
+            weekly: weeklyList,
+            monthly: monthlyList,
+            weeklyTimer: weeklyTimer,
+            monthlyTimer: monthlyTimer,
+            users: users,
+          },
+        })
+        .then((l) => {
+          setState(l);
+        });
       setInput("");
       setWarning("");
     } else {
@@ -199,13 +200,41 @@ const App = () => {
   };
   const handleWeeklyList = (l) => {
     //update the weekly staples list
-    api.updateWeeklyList({ weekly: l, u: user });
-    setWeeklyList(l);
+    api
+      .update({
+        ref: ref,
+        data: {
+          list: list,
+          filters: filters,
+          weekly: l,
+          monthly: monthlyList,
+          weeklyTimer: weeklyTimer,
+          monthlyTimer: monthlyTimer,
+          users: users,
+        },
+      })
+      .then((l) => {
+        setState(l);
+      });
   };
   const handleMonthlyList = (l) => {
     //update the monthly staples list
-    api.updateMonthlyList({ monthly: l, u: user });
-    setMonthlyList(l);
+    api
+      .update({
+        ref: ref,
+        data: {
+          list: list,
+          filters: filters,
+          weekly: weeklyList,
+          monthly: l,
+          weeklyTimer: weeklyTimer,
+          monthlyTimer: monthlyTimer,
+          users: users,
+        },
+      })
+      .then((l) => {
+        setState(l);
+      });
   };
   const checkStaples = (w, m, wl, ml) => {
     //compare the current date to the last time staples were added,  trigger addStaples if 7 or 30 days have passed
@@ -244,10 +273,24 @@ const App = () => {
   const addStaples = (t) => {
     //add the staples to the list, if they are not on it already
     //console.log("t:" + t.join());
-
     t = t.filter((e) => list.includes(e) === false);
-    //console.log(t.join());
-    setList(list.concat(t));
+    let temp = list.concat(t);
+    api
+      .update({
+        ref: ref,
+        data: {
+          list: temp,
+          filters: filters,
+          weekly: weeklyList,
+          monthly: monthlyList,
+          weeklyTimer: weeklyTimer,
+          monthlyTimer: monthlyTimer,
+          users: users,
+        },
+      })
+      .then((l) => {
+        setState(l);
+      });
   };
 
   const sorted = () => {
@@ -266,11 +309,11 @@ const App = () => {
       }
     });
     displayList = displayList.reverse();
-    return displayList.map((d) =>
+    return displayList.map((d, i) =>
       d.length === 1 ? (
         ""
       ) : (
-        <Grid item xs={12} lg={3}>
+        <Grid key={i} item xs={12} lg={3}>
           <Category
             name={d[0]}
             items={d.slice(1)}
@@ -293,7 +336,7 @@ const App = () => {
     <div className="App">
       {user !== "" ? (
         <div>
-          {load()}
+          {filters.length === 0 ? load() : ""}
           <Grid container spacing={2} style={{ marginBottom: 0 }}>
             <Grid item xs={12}>
               <Card
@@ -311,24 +354,48 @@ const App = () => {
                 >
                   Staples
                 </Button>
-                <div
-                  style={{
-                    padding: 10,
-                    border: "solid",
-                    borderColor: "lightgray",
-                    borderWidth: 1,
-                    borderRadius: 10,
-                    margin: 10,
-                  }}
+                <Button
+                  style={{ marginLeft: 0, margin: 10, height: 56 }}
+                  variant="outlined"
+                  onClick={() => setSettingsdialog(true)}
                 >
-                  <h3>1.Add an Item</h3>
-                  <h3>2.Click on the item to assign it to a filter category</h3>
-                  <h3>3.Groceri remembers your filters</h3>
-                  <h3>
-                    4.All weekly/monthly staples that are not on the list get
-                    added automatically every 7/30 days
-                  </h3>
-                </div>
+                  Settings
+                </Button>
+                {tutorial ? (
+                  <div
+                    style={{
+                      padding: 10,
+                      border: "solid",
+                      borderColor: "lightgray",
+                      borderWidth: 1,
+                      borderRadius: 10,
+                      margin: 10,
+                    }}
+                  >
+                    <h3>1.Add an Item</h3>
+                    <h3>
+                      2.Click on the item to assign it to a filter category
+                    </h3>
+                    <h3>3.Groceri remembers your filters</h3>
+                    <h3>
+                      4.All weekly/monthly staples that are not on the list get
+                      added automatically every 7/30 days
+                    </h3>
+                    <Button
+                      style={{
+                        marginLeft: 0,
+                        margin: 10,
+                      }}
+                      variant="outlined"
+                      onClick={() => showTutorial()}
+                    >
+                      Dont show this again
+                    </Button>
+                  </div>
+                ) : (
+                  ""
+                )}
+
                 <p style={{ color: "#FE5F55" }}>{warning}</p>
                 <TextField
                   variant="outlined"
@@ -342,9 +409,7 @@ const App = () => {
                 />
                 <Button
                   style={{ marginLeft: 0, margin: 10, height: 56 }}
-                  size="lg"
                   variant="outlined"
-                  color="dark"
                   disableElevation
                   onClick={() => updateList()}
                 >
@@ -361,10 +426,21 @@ const App = () => {
             setWeeklyList={(l) => handleWeeklyList(l)}
             setMonthlyList={(l) => handleMonthlyList(l)}
             setStaples={(f) => setStaplesdialog(f)}
+            addStaples={(t) => addStaples(t)}
+          />
+          <Settings
+            settings={settingsdialog}
+            user={user}
+            giveFeedback={(m) => api.giveFeedback(m)}
+            setSettingsdialog={(f) => setSettingsdialog(f)}
           />
         </div>
       ) : (
-        LoginScreen()
+        <LoginScreen
+          user={user}
+          validate={(u, p) => validate(u, p)}
+          warning={warning}
+        />
       )}
     </div>
   );

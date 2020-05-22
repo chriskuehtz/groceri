@@ -10,21 +10,22 @@ exports.handler = (event, context) => {
   const client = new faunadb.Client({
     secret: process.env.FAUNADB_SERVER_SECRET,
   });
-  const data = JSON.parse(event.body);
-  let ref = 0;
+  const input = JSON.parse(event.body);
+  let ref = "265946883492413954";
 
   return client
-    .query(q.Get(q.Match(q.Index("entries"), data.u)))
+    .query(q.Get(q.Ref(q.Collection("feedback"), ref)))
     .then((response) => {
-      ref = response.ref.id;
+      console.log(response.data);
+      let item = response.data.feedback.concat(input);
       client
         .query(
-          q.Update(q.Ref(q.Collection("entries"), ref), {
-            data: { list: data.list },
+          q.Update(q.Ref(q.Collection("feedback"), ref), {
+            data: { feedback: item },
           })
         )
         .then((response) => {
-          console.log("update list success", response);
+          console.log("update feedback success", response);
           return {
             message: "success",
             statusCode: 200,

@@ -17,7 +17,10 @@ exports.handler = (event, context) => {
       return {
         message: "valid",
         statusCode: 200,
-        body: JSON.stringify(response.data.hash),
+        body: JSON.stringify({
+          hash: response.data.hash,
+          tutorial: response.data.tutorial,
+        }),
       };
     })
     .catch((error) => {

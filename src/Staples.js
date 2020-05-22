@@ -56,6 +56,7 @@ const Staples = (props) => {
                 margin: 10,
                 backgroundColor: "#FAFAFA",
                 paddingBottom: 20,
+                marginBottom: 50,
               }}
             >
               <h1 style={{ paddingLeft: 20 }}>STAPLES</h1>
@@ -70,20 +71,12 @@ const Staples = (props) => {
               >
                 <CloseIcon />
               </IconButton>
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Card
-              elevation={3}
-              style={{
-                margin: 10,
-                backgroundColor: "#FAFAFA",
-              }}
-            >
+
               <h4 style={{ paddingLeft: 20 }}>WEEKLY STAPLES:</h4>
+
               <TextField
                 variant="outlined"
-                style={{ width: "60%", padding: 10, paddingRight: 0 }}
+                style={{ width: "90%", padding: 10, paddingRight: 0 }}
                 type="text"
                 name="weekly"
                 placeholder="add weekly staple"
@@ -91,18 +84,19 @@ const Staples = (props) => {
                 onChange={(event) => handleInput(event)}
                 onKeyPress={keyPressed}
               />
-              {props.weeklyList.map((w) => (
+              {props.weeklyList.map((w, i) => (
                 <ButtonGroup
+                  key={i}
                   style={{
                     width: "90%",
                     marginLeft: "5%",
                     marginBottom: 5,
                   }}
-                  color="dark"
                   aria-label="dark button group"
                 >
                   <Button style={{ width: "80%" }}>{w}</Button>
                   <Button
+                    style={{ width: "20%" }}
                     aria-label="delete"
                     onClick={() =>
                       props.setWeeklyList(
@@ -114,22 +108,22 @@ const Staples = (props) => {
                   </Button>
                 </ButtonGroup>
               ))}
-            </Card>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Card
-              elevation={3}
-              style={{
-                margin: 10,
-                backgroundColor: "#FAFAFA",
-                marginBottom: 50,
-                paddingBottom: 20,
-              }}
-            >
-              <h4 style={{ paddingLeft: 20 }}>MONTHLY STAPLES:</h4>
+              <Button
+                style={{ marginLeft: 0, margin: 10, height: 56 }}
+                variant="outlined"
+                disableElevation
+                onClick={() => props.addStaples(props.weeklyList)}
+              >
+                add all to list
+              </Button>
+
+              <h4 style={{ paddingLeft: 20, width: "60%" }}>
+                MONTHLY STAPLES:
+              </h4>
+
               <TextField
                 variant="outlined"
-                style={{ width: "60%", padding: 10, paddingRight: 0 }}
+                style={{ width: "90%", padding: 10, paddingRight: 0 }}
                 type="text"
                 name="monthly"
                 placeholder="add monthly staple"
@@ -137,18 +131,19 @@ const Staples = (props) => {
                 onChange={(event) => handleInput(event)}
                 onKeyPress={keyPressed}
               />
-              {props.monthlyList.map((m) => (
+              {props.monthlyList.map((m, i) => (
                 <ButtonGroup
+                  key={i}
                   style={{
                     width: "90%",
-                    marginLeft: "5%",
+                    marginLeft: 10,
                     marginBottom: 5,
                   }}
-                  color="dark"
                   aria-label="dark button group"
                 >
                   <Button style={{ width: "80%" }}>{m}</Button>
                   <Button
+                    style={{ width: "20%" }}
                     aria-label="delete"
                     onClick={() =>
                       props.setMonthlyList(
@@ -160,6 +155,14 @@ const Staples = (props) => {
                   </Button>
                 </ButtonGroup>
               ))}
+              <Button
+                style={{ marginLeft: 0, margin: 10, height: 56 }}
+                variant="outlined"
+                disableElevation
+                onClick={() => props.addStaples(props.monthlyList)}
+              >
+                add all to list
+              </Button>
             </Card>
           </Grid>
         </Grid>

@@ -42,6 +42,13 @@ exports.handler = (event, context) => {
             body: JSON.stringify(error),
           };
         });
+      console.log("update stapletimer success");
+      console.log(response);
+      return {
+        message: "success",
+        statusCode: 200,
+        body: JSON.stringify(response),
+      };
     })
     .catch((error) => {
       console.log("error", error);
