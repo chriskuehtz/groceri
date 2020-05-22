@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import bcryptjs from "bcryptjs";
 import api from "./utils/api";
 import isLocalHost from "./utils/isLocalHost";
@@ -23,8 +23,17 @@ const App = () => {
   const [settingsdialog, setSettingsdialog] = useState(false);
   const [tutorial, setTutorial] = useState(false);
   const [ref, setRef] = useState("");
-  const [users, setUsers] = useState("");
+  const [users, setUsers] = useState([]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (users.length > 1) {
+        console.log("useEffect");
+        load();
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [users]);
   const setState = (l) => {
     //console.log(l);
     setList(l.data.list);
@@ -51,35 +60,39 @@ const App = () => {
 
   //basically componentdidMount
   const load = () => {
-    api.read(user).then((l) => {
-      if (l.message === "unauthorized") {
-        if (isLocalHost()) {
-          alert(
-            "FaunaDB key is not unauthorized. Make sure you set it in terminal session where you ran `npm start`. Visit http://bit.ly/set-fauna-key for more info"
-          );
-        } else {
-          alert(
-            "FaunaDB key is not unauthorized. Verify the key `FAUNADB_SERVER_SECRET` set in Netlify enviroment variables is correct"
-          );
+    if (user !== "") {
+      api.read(user).then((l) => {
+        if (l.message === "unauthorized") {
+          if (isLocalHost()) {
+            alert(
+              "FaunaDB key is not unauthorized. Make sure you set it in terminal session where you ran `npm start`. Visit http://bit.ly/set-fauna-key for more info"
+            );
+          } else {
+            alert(
+              "FaunaDB key is not unauthorized. Verify the key `FAUNADB_SERVER_SECRET` set in Netlify enviroment variables is correct"
+            );
+          }
+          return false;
         }
-        return false;
-      }
 
-      setRef(Object.entries(l.ref)[0][1].id.toString());
-      setList(l.data.list);
-      setFilters(l.data.filters);
-      setWeeklyList(l.data.weekly);
-      setMonthlyList(l.data.monthly);
-      setWeeklyTimer(l.data.weeklyTimer);
-      setMonthlyTimer(l.data.monthlyTimer);
-      setUsers(l.data.users);
-      checkStaples(
-        l.data.weeklyTimer,
-        l.data.monthlyTimer,
-        l.data.weekly,
-        l.data.monthly
-      );
-    });
+        setRef(Object.entries(l.ref)[0][1].id.toString());
+        setList(l.data.list);
+        setFilters(l.data.filters);
+        setWeeklyList(l.data.weekly);
+        setMonthlyList(l.data.monthly);
+        setWeeklyTimer(l.data.weeklyTimer);
+        setMonthlyTimer(l.data.monthlyTimer);
+        setUsers(l.data.users);
+        checkStaples(
+          l.data.weeklyTimer,
+          l.data.monthlyTimer,
+          l.data.weekly,
+          l.data.monthly
+        );
+      });
+    } else {
+      console.log("no user");
+    }
   };
   const handleInput = (event) => {
     //handle the input field

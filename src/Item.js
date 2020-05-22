@@ -42,7 +42,7 @@ const Item = (props) => {
       setWarning("");
     } else {
       setDialog(false);
-      setInput("");
+
       setWarning("");
     }
   };
