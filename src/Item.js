@@ -17,22 +17,33 @@ import "./App.css";
 const Item = (props) => {
   const [dialog, setDialog] = useState(false);
   const [input, setInput] = useState(props.name);
+  const [warning, setWarning] = useState("");
 
   const filters = props.filters;
 
   const handleInput = (event) => {
     if (event.target.name === "input") {
-      setInput(event.target.value);
+      if (event.target.value === "") {
+        setInput(event.target.value);
+        setWarning("can not set name to empty");
+      } else {
+        setInput(event.target.value);
+        setWarning("");
+      }
     }
   };
   const changeEntry = () => {
-    if (input !== props.name) {
+    if (input === "") {
+      setWarning("can not set name to empty");
+    } else if (input !== props.name) {
       props.changeEntry(props.name, input);
       setDialog(false);
       setInput("");
+      setWarning("");
     } else {
       setDialog(false);
       setInput("");
+      setWarning("");
     }
   };
   const pushFilter = (a, b) => {
@@ -91,6 +102,7 @@ const Item = (props) => {
                   backgroundColor: "#FAFAFA",
                 }}
               >
+                <p style={{ color: "red" }}>{warning}</p>
                 <TextField
                   variant="outlined"
                   style={{ width: "70%", padding: 10, paddingRight: 0 }}
