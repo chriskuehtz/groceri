@@ -27,9 +27,11 @@ const Staples = (props) => {
     //call updatelist by pressing enter in the
     if (event.key === "Enter") {
       if (event.target.name === "weekly") {
-        props.setWeeklyList(props.weeklyList.concat([weekly]));
+        props.setWeeklyList([weekly].concat(props.weeklyList));
+        setWeekly("");
       } else if (event.target.name === "monthly") {
-        props.setMonthlyList(props.monthlyList.concat([monthly]));
+        props.setMonthlyList([monthly].concat(props.monthlyList));
+        setMonthly("");
       }
     }
   };
