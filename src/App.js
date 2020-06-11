@@ -14,6 +14,7 @@ import bcrypt from "bcryptjs";
 const App = () => {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
+  const [ref, setRef] = useState("");
   const [loginScreen, setLoginScreen] = useState(true);
   const [list, setList] = useState([]);
   const [filters, setFilters] = useState([]);
@@ -75,6 +76,7 @@ const App = () => {
   const fetchData = async (u) => {
     const result = await api.read(u);
     console.log(result);
+    setRef(result.data.ref);
     setList(result.data.list);
     setFilters(result.data.filters);
     setWeekly(result.data.weekly);
@@ -120,7 +122,7 @@ const App = () => {
       data.monthlyTimer = new Date().getTime();
     }
     const result = await api.update({
-      ref: "265547352335450635",
+      ref: ref,
       data: data,
     });
     console.log("received");
@@ -143,9 +145,15 @@ const App = () => {
       setWarning("wrong user or password");
     }
   };
+
   //add an item to the list
   const addItem = () => {
     //perform api.update with the list with the new item
+    const keyPressed = (event) => {
+      if (event.key === "Enter" && item !== "") {
+        concatItem();
+      }
+    };
     const concatItem = () => {
       if (item !== "") {
         let temp = item.toLowerCase();
@@ -167,6 +175,7 @@ const App = () => {
             placeholder="add smth"
             value={item}
             onChange={(event) => setItem(event.target.value)}
+            onKeyPress={keyPressed}
           />
           <Button
             outline
@@ -326,6 +335,16 @@ const App = () => {
         setWarning("you cannot add an empty Item");
       }
     };
+    const keyPressedWeekly = (event) => {
+      if (event.key === "Enter" && weeklyItem !== "") {
+        concatStaple("weekly");
+      }
+    };
+    const keyPressedMonthly = (event) => {
+      if (event.key === "Enter" && monthlyItem !== "") {
+        concatStaple("monthly");
+      }
+    };
 
     return (
       <Row style={fullscreen}>
@@ -337,6 +356,7 @@ const App = () => {
               placeholder="add smth"
               value={weeklyItem}
               onChange={(event) => setWeeklyItem(event.target.value)}
+              onKeyPress={keyPressedWeekly}
             />
             <Button
               outline
@@ -388,6 +408,7 @@ const App = () => {
               placeholder="add smth"
               value={monthlyItem}
               onChange={(event) => setMonthlyItem(event.target.value)}
+              onKeyPress={keyPressedMonthly}
             />
             <Button
               outline
