@@ -5,7 +5,6 @@ const validate = (u) => {
     body: JSON.stringify({ user: u }),
     method: "POST",
   }).then((response) => {
-    //console.log(response.json());
     return response.json();
   });
 };
@@ -26,8 +25,6 @@ const read = (u) => {
   });
 };
 const update = (l) => {
-  //console.log("went to /api");
-  //console.log(list);
   return fetch(`/.netlify/functions/update`, {
     method: "POST",
     body: JSON.stringify(l),
@@ -36,15 +33,6 @@ const update = (l) => {
   });
 };
 
-const updateStapleTimer = (t) => {
-  //console.log(t);
-  return fetch(`/.netlify/functions/update-stapleTimer`, {
-    method: "POST",
-    body: JSON.stringify(t),
-  }).then((response) => {
-    return response.json();
-  });
-};
 const giveFeedback = (f) => {
   return fetch(`/.netlify/functions/giveFeedback`, {
     method: "POST",
@@ -66,7 +54,6 @@ export default {
   read: read,
   validate: validate,
   update: update,
-  updateStapleTimer: updateStapleTimer,
   giveFeedback: giveFeedback,
   showTutorial: showTutorial,
   changePW: changePW,

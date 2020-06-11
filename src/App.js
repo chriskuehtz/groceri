@@ -1,462 +1,508 @@
 import React, { useState, useEffect } from "react";
-import bcryptjs from "bcryptjs";
-import api from "./utils/api";
-import isLocalHost from "./utils/isLocalHost";
-import "./App.css";
-import Category from "./Category";
-import Staples from "./Staples";
-import { Button, TextField, Card, Grid } from "@material-ui/core";
-import LoginScreen from "./LoginScreen";
-import Settings from "./Settings";
+import {
+  Card,
+  Input,
+  Button,
+  ButtonGroup,
+  Container,
+  Row,
+  Col,
+} from "reactstrap";
+import api from "./utils/api.js";
+import bcrypt from "bcryptjs";
 
 const App = () => {
   const [user, setUser] = useState("");
-  const [input, setInput] = useState("");
-  const [warning, setWarning] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginScreen, setLoginScreen] = useState(true);
   const [list, setList] = useState([]);
-  const [weeklyList, setWeeklyList] = useState([]);
-  const [monthlyList, setMonthlyList] = useState([]);
+  const [filters, setFilters] = useState([]);
+  const [item, setItem] = useState("");
+  const [warning, setWarning] = useState("");
+  const [filterItem, setFilterItem] = useState(null);
+  const [staplesMenu, setStaplesMenu] = useState(false);
+  const [weekly, setWeekly] = useState([]);
+  const [monthly, setMonthly] = useState([]);
+  const [weeklyItem, setWeeklyItem] = useState("");
+  const [monthlyItem, setMonthlyItem] = useState("");
   const [weeklyTimer, setWeeklyTimer] = useState("");
   const [monthlyTimer, setMonthlyTimer] = useState("");
-  const [filters, setFilters] = useState([]);
-  const [staplesdialog, setStaplesdialog] = useState(false);
-  const [settingsdialog, setSettingsdialog] = useState(false);
-  const [tutorial, setTutorial] = useState(false);
-  const [ref, setRef] = useState("");
-  const [users, setUsers] = useState([]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (users.length > 1) {
-        console.log("useEffect");
-        load();
-      }
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [users]);
-  const setState = (l) => {
-    //console.log(l);
-    setList(l.data.list);
-    setFilters(l.data.filters);
-    setWeeklyList(l.data.weekly);
-    setMonthlyList(l.data.monthly);
-    sorted();
+  //styles:
+  const fullscreen = {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    minHeight: "100vh",
+    heigth: "100%",
+    width: "100vw",
+    backgroundColor: "#264653",
   };
-  const validate = (u, p) => {
-    api.validate(u).then((res) => {
-      if (bcryptjs.compareSync(p, res.hash)) {
-        setTutorial(res.tutorial);
-        setWarning("");
-        setUser(u);
-      } else {
-        setWarning("incorrect Password or Username");
-      }
-    });
+  const card = {
+    backgroundColor: "white",
+    width: "96%",
+    margin: "2%",
   };
-  const showTutorial = () => {
-    setTutorial(false);
-    api.showTutorial({ user: user, tutorial: false });
+  const cardHeader = {
+    marginLeft: "2%",
   };
+  const bigCard = {
+    backgroundColor: "white",
+    margin: "2%",
+  };
+  const inputElement = {
+    width: "96%",
+    fontSize: "4vh",
+    margin: "2%",
+  };
+  const functionButton = {
+    width: "96%",
+    fontSize: "4vh",
+    margin: "2%",
+  };
+  const categoryButton = {
+    backgroundColor: "white",
+    color: "black",
+    width: "96%",
+    fontSize: "4vh",
+    margin: "2%",
+  };
+  const buttonGroup = { width: "96%", margin: "2%" };
+  const itemButton = { width: "80%" };
+  const deleteButton = { width: "20%" };
 
-  //basically componentdidMount
-  const load = () => {
-    if (user !== "") {
-      api.read(user).then((l) => {
-        if (l.message === "unauthorized") {
-          if (isLocalHost()) {
-            alert(
-              "FaunaDB key is not unauthorized. Make sure you set it in terminal session where you ran `npm start`. Visit http://bit.ly/set-fauna-key for more info"
-            );
-          } else {
-            alert(
-              "FaunaDB key is not unauthorized. Verify the key `FAUNADB_SERVER_SECRET` set in Netlify enviroment variables is correct"
-            );
-          }
-          return false;
-        }
-
-        setRef(Object.entries(l.ref)[0][1].id.toString());
-        setList(l.data.list);
-        setFilters(l.data.filters);
-        setWeeklyList(l.data.weekly);
-        setMonthlyList(l.data.monthly);
-        setWeeklyTimer(l.data.weeklyTimer);
-        setMonthlyTimer(l.data.monthlyTimer);
-        setUsers(l.data.users);
-        checkStaples(
-          l.data.weeklyTimer,
-          l.data.monthlyTimer,
-          l.data.weekly,
-          l.data.monthly
-        );
-      });
-    } else {
-      console.log("no user");
+  //load the data upon login
+  const fetchData = async (u) => {
+    const result = await api.read(u);
+    console.log(result);
+    setList(result.data.list);
+    setFilters(result.data.filters);
+    setWeekly(result.data.weekly);
+    setMonthly(result.data.monthly);
+    setWeeklyTimer(result.data.weeklyTimer);
+    setMonthlyTimer(result.data.monthlyTimer);
+    /*if (new Date().getTime() > weeklyTimer + 7 * 24 * 60 * 60 * 1000) {
+      triggerUpdate(
+        list.concat(weekly.filter((w) => list.includes(w) === false)),
+        "listWeekly"
+      );
     }
+    if (new Date().getTime() > monthlyTimer + 30 * 24 * 60 * 60 * 1000) {
+      triggerUpdate(
+        list.concat(monthly.filter((m) => list.includes(m) === false)),
+        "listMonthly"
+      );
+    }*/
   };
-  const handleInput = (event) => {
-    //handle the input field
-    if (event.target.name === "input") {
-      setInput(event.target.value);
+  const triggerUpdate = async (parameter, name) => {
+    let data = {
+      users: ["chris", "icia"],
+      list: list,
+      weekly: weekly,
+      monthly: monthly,
+      weeklyTimer: weeklyTimer,
+      monthlyTimer: monthlyTimer,
+      filters: filters,
+    };
+    if (name === "list") {
+      data.list = parameter;
+    } else if (name === "filters") {
+      data.filters = parameter;
+    } else if (name === "weekly") {
+      data.weekly = parameter;
+    } else if (name === "monthly") {
+      data.monthly = parameter;
+    } else if (name === "listWeekly") {
+      data.list = parameter;
+      data.weeklyTimer = new Date().getTime();
+    } else if (name === "listMonthly") {
+      data.list = parameter;
+      data.monthlyTimer = new Date().getTime();
     }
-  };
-  const changeEntry = (prev, next) => {
-    //changes an entry in the list
-    //console.log("prev:" + prev);
-    //console.log("next:" + next);
-    let temp = [].concat(list);
-    temp = temp.map((t) => {
-      if (t === prev) return next.toLowerCase();
-      else return t;
+    const result = await api.update({
+      ref: "265547352335450635",
+      data: data,
     });
-    //console.log(temp.join());
-    api
-      .update({
-        ref: ref,
-        data: {
-          list: temp,
-          filters: filters,
-          weekly: weeklyList,
-          monthly: monthlyList,
-          weeklyTimer: weeklyTimer,
-          monthlyTimer: monthlyTimer,
-          users: users,
-        },
-      })
-      .then((l) => {
-        setState(l);
-      });
+    console.log("received");
+    console.log(result.data);
+    setList(result.data.list);
+    setFilters(result.data.filters);
+    setWeekly(result.data.weekly);
+    setMonthly(result.data.monthly);
+    setWeeklyTimer(result.data.weeklyTimer);
+    setMonthlyTimer(result.data.monthlyTimer);
   };
-  const deleteEntry = (l) => {
-    //deletes an entry and all duplicates
-
-    api
-      .update({
-        ref: ref,
-        data: {
-          list: l,
-          filters: filters,
-          weekly: weeklyList,
-          monthly: monthlyList,
-          weeklyTimer: weeklyTimer,
-          monthlyTimer: monthlyTimer,
-          users: users,
-        },
-      })
-      .then((l) => {
-        setState(l);
-      });
-  };
-  const pushFilter = (cat, filter) => {
-    //adds a filter
-    let categ = cat.toString();
-    //console.log("category:" + categ);
-    //console.log("filter:" + filter);
-    let filtersCopy = [].concat(filters);
-    //console.log(filtersCopy);
-    filtersCopy = filtersCopy.map((f) => f.filter((fi) => fi !== filter));
-    //console.log(filtersCopy.filter((f) => f.includes(categ)));
-    filtersCopy.filter((f) => f.includes(categ))[0].push(filter.toLowerCase());
-    //console.log(filtersCopy);
-
-    api
-      .update({
-        ref: ref,
-        data: {
-          list: list,
-          filters: filtersCopy,
-          weekly: weeklyList,
-          monthly: monthlyList,
-          weeklyTimer: weeklyTimer,
-          monthlyTimer: monthlyTimer,
-          users: users,
-        },
-      })
-      .then((l) => {
-        setState(l);
-      });
-  };
-  const updateList = () => {
-    //add an item to the list
-    if (list.includes(input)) {
-      setWarning("this item is already on your list");
-    } else if (input !== "" && input.length < 100) {
-      let i = input.toLowerCase();
-      let temp = list.concat(i);
-      api
-        .update({
-          ref: ref,
-          data: {
-            list: temp,
-            filters: filters,
-            weekly: weeklyList,
-            monthly: monthlyList,
-            weeklyTimer: weeklyTimer,
-            monthlyTimer: monthlyTimer,
-            users: users,
-          },
-        })
-        .then((l) => {
-          setState(l);
-        });
-      setInput("");
+  const validate = async (u, p) => {
+    const result = await api.validate(u);
+    if (bcrypt.compareSync(p, result.hash)) {
+      console.log("password correct");
+      fetchData(u);
+      setLoginScreen(false);
       setWarning("");
     } else {
-      setWarning("you cannot add a nameless entry");
+      setWarning("wrong user or password");
     }
   };
-  const keyPressed = (event) => {
-    //call updatelist by pressing enter in the
-    if (event.key === "Enter") {
-      updateList();
-    }
-  };
-  const handleWeeklyList = (l) => {
-    //update the weekly staples list
-    api
-      .update({
-        ref: ref,
-        data: {
-          list: list,
-          filters: filters,
-          weekly: l,
-          monthly: monthlyList,
-          weeklyTimer: weeklyTimer,
-          monthlyTimer: monthlyTimer,
-          users: users,
-        },
-      })
-      .then((l) => {
-        setState(l);
-      });
-  };
-  const handleMonthlyList = (l) => {
-    //update the monthly staples list
-    api
-      .update({
-        ref: ref,
-        data: {
-          list: list,
-          filters: filters,
-          weekly: weeklyList,
-          monthly: l,
-          weeklyTimer: weeklyTimer,
-          monthlyTimer: monthlyTimer,
-          users: users,
-        },
-      })
-      .then((l) => {
-        setState(l);
-      });
-  };
-  const checkStaples = (w, m, wl, ml) => {
-    //compare the current date to the last time staples were added,  trigger addStaples if 7 or 30 days have passed
-    if (
-      (new Date().getTime() - w) / (1000 * 3600 * 24) > 6 &&
-      (new Date().getTime() - m) / (1000 * 3600 * 24) > 29
-    ) {
-      //console.log("what a coincidence, weekly and monthly staples at once");
-      api.updateStapleTimer({
-        weekly: new Date().getTime(),
-        monthly: new Date().getTime(),
-        u: user,
-      });
-      addStaples(wl.concat(ml));
-    } else if ((new Date().getTime() - w) / (1000 * 3600 * 24) > 6) {
-      //console.log("need to add weekly staples");
-      api.updateStapleTimer({
-        weekly: new Date().getTime(),
-        monthly: m,
-        u: user,
-      });
-      addStaples(wl);
-    } else if ((new Date().getTime() - m) / (1000 * 3600 * 24) > 29) {
-      //console.log("need to add monthly staples");
-      api.updateStapleTimer({
-        weekly: w,
-        monthly: new Date().getTime(),
-        u: user,
-      });
-
-      addStaples(ml);
-    } else {
-      //console.log("not the time to add any staples");
-    }
-  };
-  const addStaples = (t) => {
-    //add the staples to the list, if they are not on it already
-    //console.log("t:" + t.join());
-    t = t.filter((e) => list.includes(e) === false);
-    let temp = list.concat(t);
-    api
-      .update({
-        ref: ref,
-        data: {
-          list: temp,
-          filters: filters,
-          weekly: weeklyList,
-          monthly: monthlyList,
-          weeklyTimer: weeklyTimer,
-          monthlyTimer: monthlyTimer,
-          users: users,
-        },
-      })
-      .then((l) => {
-        setState(l);
-      });
-  };
-
-  const sorted = () => {
-    let copyList = [].concat(list);
-    copyList = copyList.map((e) => e.toLowerCase());
-    let displayList = [];
-    filters.forEach((f) => {
-      let temp = [f[0]];
-      if (f[0] === "OTHER") {
-        temp = temp.concat(copyList);
-        displayList.push(temp);
+  //add an item to the list
+  const addItem = () => {
+    //perform api.update with the list with the new item
+    const concatItem = () => {
+      if (item !== "") {
+        let temp = item.toLowerCase();
+        let tempList = list.concat(temp);
+        setItem("");
+        setWarning("");
+        triggerUpdate(tempList, "list");
       } else {
-        temp = temp.concat(copyList.filter((e) => f.includes(e)));
-        displayList.push(temp);
-        copyList = copyList.filter((e) => !f.includes(e));
+        setWarning("you cannot add an empty Item");
+      }
+    };
+    //return the input field
+    return (
+      <Col xs="12">
+        <Card style={bigCard}>
+          <h1 style={cardHeader}>GROCERI</h1>
+          <Input
+            style={inputElement}
+            placeholder="add smth"
+            value={item}
+            onChange={(event) => setItem(event.target.value)}
+          />
+          <Button
+            outline
+            color="dark"
+            style={functionButton}
+            onClick={() => concatItem()}
+          >
+            Add
+          </Button>
+        </Card>
+      </Col>
+    );
+  };
+  //perform api.update with the list without the deleted item
+  const deleteItem = (item) => {
+    console.log(item);
+    let temp = list.filter((e) => e !== item);
+    triggerUpdate(temp, "list");
+  };
+  const deleteWeekly = (item) => {
+    console.log(item);
+    let temp = weekly.filter((e) => e !== item);
+    triggerUpdate(temp, "weekly");
+  };
+  const deleteMonthly = (item) => {
+    console.log(item);
+    let temp = monthly.filter((e) => e !== item);
+    triggerUpdate(temp, "monthly");
+  };
+  //map the list according to filter category
+  const mapFilters = () => {
+    //temp variable because everything that does not belong in a filter goes in the "other" filter
+    let tempList = [].concat(list);
+    let tempFilters = [];
+
+    filters.forEach((f) => {
+      if (f[0] === "OTHER") {
+        let tempFilter = [];
+        tempFilter.push(f[0]);
+        tempFilter = tempFilter.concat(tempList);
+        tempFilters.push(tempFilter);
+      } else {
+        let tempFilter = [];
+        tempFilter.push(f[0]);
+        tempFilter = tempFilter.concat(f.filter((e) => tempList.includes(e)));
+        tempList = tempList.filter((e) => tempFilter.includes(e) === false);
+        tempFilters.push(tempFilter);
       }
     });
-    displayList = displayList.reverse();
-    return displayList.map((d, i) =>
-      d.length === 1 ? (
-        ""
-      ) : (
-        <Grid key={i} item xs={12} lg={3}>
-          <Category
-            name={d[0]}
-            items={d.slice(1)}
-            list={list}
-            deleteEntry={(l) => deleteEntry(l)}
-            filters={filters}
-            pushFilter={(cat, fil) => pushFilter(cat, fil)}
-            changeEntry={(prev, next) => changeEntry(prev, next)}
-            weeklyList={weeklyList}
-            monthlyList={monthlyList}
-            setWeeklyList={(l) => handleWeeklyList(l)}
-            setMonthlyList={(l) => handleMonthlyList(l)}
-          />
-        </Grid>
-      )
+    return (
+      <Row style={fullscreen}>
+        {addItem()}{" "}
+        {tempFilters
+          .filter((f) => f.length > 1)
+          .map((f) => (
+            <Col xs="12" lg="6">
+              <Card style={card}>
+                <h3 style={cardHeader}>{f[0]}</h3>
+                {f.slice(1).map((e) => (
+                  <ButtonGroup outline style={buttonGroup}>
+                    <Button
+                      outline
+                      color="dark"
+                      style={itemButton}
+                      onClick={() => setFilterItem(e)}
+                    >
+                      {e}
+                    </Button>
+                    <Button
+                      outline
+                      color="danger"
+                      style={deleteButton}
+                      onClick={() => deleteItem(e)}
+                    >
+                      X
+                    </Button>
+                  </ButtonGroup>
+                ))}
+              </Card>
+            </Col>
+          ))}
+        <Col xs="12">
+          <Button
+            color="danger"
+            style={functionButton}
+            onClick={() => setStaplesMenu(true)}
+          >
+            Staples
+          </Button>
+        </Col>
+      </Row>
+    );
+  };
+  //perform api.update with the filters with the new item
+  const assignFilter = (item, filterIndex) => {
+    //copy of filters
+    let tempFilters = [].concat(filters);
+    //remove item from its current filter category
+    tempFilters = tempFilters.map((f) => f.filter((e) => e !== item));
+    //push item into the new category
+    tempFilters[filterIndex].push(item);
+    setFilterItem(null);
+    triggerUpdate(tempFilters, "filters");
+  };
+  const showFilterMenu = () => {
+    if (filterItem !== null) {
+      return (
+        <Row style={fullscreen}>
+          <Col xs="12">
+            <Card style={card}>
+              <h1 style={cardHeader}>{filterItem}</h1>
+            </Card>
+          </Col>
+
+          {filters.map((f, i) => (
+            <Col xs="12" lg="2">
+              <Button
+                style={categoryButton}
+                onClick={() => assignFilter(filterItem, i)}
+              >
+                <p>{f[0]}</p>
+              </Button>
+            </Col>
+          ))}
+          <Col xs="12">
+            <Button
+              color="danger"
+              style={functionButton}
+              onClick={() => setFilterItem(null)}
+            >
+              Back
+            </Button>
+          </Col>
+        </Row>
+      );
+    } else {
+      return;
+    }
+  };
+  const showStaplesMenu = () => {
+    const concatStaple = (s) => {
+      if (s === "weekly" && weeklyItem !== "") {
+        let temp = weeklyItem.toLowerCase();
+        let tempList = weekly;
+        tempList = tempList.concat(temp);
+        setWeeklyItem("");
+        setWarning("");
+        triggerUpdate(tempList, s);
+      } else if (s === "monthly" && monthlyItem !== "") {
+        let temp = monthlyItem.toLowerCase();
+        let tempList = monthly;
+        tempList = tempList.concat(temp);
+        setMonthlyItem("");
+        setWarning("");
+        triggerUpdate(tempList, s);
+      } else {
+        setWarning("you cannot add an empty Item");
+      }
+    };
+
+    return (
+      <Row style={fullscreen}>
+        <Col xs="12">
+          <Card style={card}>
+            <h1 style={cardHeader}>Weekly</h1>
+            <Input
+              style={inputElement}
+              placeholder="add smth"
+              value={weeklyItem}
+              onChange={(event) => setWeeklyItem(event.target.value)}
+            />
+            <Button
+              outline
+              color="dark"
+              style={functionButton}
+              onClick={() => concatStaple("weekly")}
+            >
+              Add
+            </Button>
+            {weekly.map((e) => (
+              <ButtonGroup outline style={buttonGroup}>
+                <Button outline color="dark" style={itemButton}>
+                  {e}
+                </Button>
+                <Button
+                  outline
+                  color="danger"
+                  style={deleteButton}
+                  onClick={() => deleteWeekly(e)}
+                >
+                  X
+                </Button>
+              </ButtonGroup>
+            ))}
+            <Button
+              outline
+              color="dark"
+              style={functionButton}
+              onClick={() =>
+                triggerUpdate(
+                  list.concat(weekly.filter((w) => list.includes(w) === false)),
+                  "listWeekly"
+                )
+              }
+            >
+              Add all weekly Staples
+            </Button>
+            <Button disabled style={categoryButton}>
+              weekly Staples will be added automatically on{" "}
+              {new Date(weeklyTimer + 7 * 24 * 60 * 60 * 1000).toDateString()}
+            </Button>
+          </Card>
+        </Col>
+        <Col xs="12">
+          <Card style={card}>
+            <h1 style={cardHeader}>Monthly</h1>
+            <Input
+              style={inputElement}
+              placeholder="add smth"
+              value={monthlyItem}
+              onChange={(event) => setMonthlyItem(event.target.value)}
+            />
+            <Button
+              outline
+              color="dark"
+              style={functionButton}
+              onClick={() => concatStaple("monthly")}
+            >
+              Add
+            </Button>
+            {monthly.map((e) => (
+              <ButtonGroup outline style={buttonGroup}>
+                <Button outline color="dark" style={itemButton}>
+                  {e}
+                </Button>
+                <Button
+                  outline
+                  color="danger"
+                  style={deleteButton}
+                  onClick={() => deleteMonthly(e)}
+                >
+                  X
+                </Button>
+              </ButtonGroup>
+            ))}
+            <Button
+              outline
+              color="dark"
+              style={functionButton}
+              onClick={() =>
+                triggerUpdate(
+                  list.concat(
+                    monthly.filter((m) => list.includes(m) === false)
+                  ),
+                  "listMonthly"
+                )
+              }
+            >
+              Add all monthly Staples
+            </Button>
+            <Button disabled style={categoryButton}>
+              monthly Staples will be added automatically on{" "}
+              {new Date(monthlyTimer + 30 * 24 * 60 * 60 * 1000).toDateString()}
+            </Button>
+          </Card>
+        </Col>
+        <Col xs="12">
+          <Button
+            style={functionButton}
+            color="danger"
+            onClick={() => setStaplesMenu(false)}
+          >
+            back
+          </Button>
+        </Col>
+      </Row>
+    );
+  };
+  const showLoginScreen = () => {
+    if (loginScreen === true) {
+      return (
+        <Row style={fullscreen}>
+          <Col xs="12">
+            <Card style={{ marginTop: "20%", width: "90%", marginLeft: "5%" }}>
+              <h1 style={cardHeader}>GROCERI</h1>
+              <h4 style={cardHeader}>organize your grocery shopping!</h4>
+              <Input
+                style={inputElement}
+                placeholder="user"
+                value={user}
+                onChange={(event) => setUser(event.target.value)}
+              />
+              <Input
+                style={inputElement}
+                type="password"
+                placeholder="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+              />
+              <Button
+                color="danger"
+                style={functionButton}
+                onClick={() => validate(user, password)}
+              >
+                Log in
+              </Button>
+              <p>{warning}</p>
+            </Card>
+          </Col>
+        </Row>
+      );
+    } else return "";
+  };
+  //return the warning, or "nothing"
+  const showWarning = () => {
+    return (
+      <Col style={{ color: "red" }} xs="12">
+        {warning}
+      </Col>
     );
   };
 
+  //return of App
   return (
-    <div className="App">
-      {user !== "" ? (
-        <div>
-          {filters.length === 0 ? load() : ""}
-          <Grid container spacing={2} style={{ marginBottom: 0 }}>
-            <Grid item xs={12}>
-              <Card
-                elevation={3}
-                style={{
-                  margin: 10,
-                  backgroundColor: "#FAFAFA",
-                }}
-              >
-                <h1 style={{ paddingLeft: 10 }}>GROCERI</h1>
-                <Button
-                  style={{ marginLeft: 0, margin: 10, height: 56 }}
-                  variant="outlined"
-                  onClick={() => setStaplesdialog(true)}
-                >
-                  Staples
-                </Button>
-                <Button
-                  style={{ marginLeft: 0, margin: 10, height: 56 }}
-                  variant="outlined"
-                  onClick={() => setSettingsdialog(true)}
-                >
-                  Settings
-                </Button>
-                {tutorial ? (
-                  <div
-                    style={{
-                      padding: 10,
-                      border: "solid",
-                      borderColor: "lightgray",
-                      borderWidth: 1,
-                      borderRadius: 10,
-                      margin: 10,
-                    }}
-                  >
-                    <h3>1.Add an Item</h3>
-                    <h3>
-                      2.Click on the item to assign it to a filter category
-                    </h3>
-                    <h3>3.Groceri remembers your filters</h3>
-                    <h3>
-                      4.All weekly/monthly staples that are not on the list get
-                      added automatically every 7/30 days
-                    </h3>
-                    <Button
-                      style={{
-                        marginLeft: 0,
-                        margin: 10,
-                      }}
-                      variant="outlined"
-                      onClick={() => showTutorial()}
-                    >
-                      Dont show this again
-                    </Button>
-                  </div>
-                ) : (
-                  ""
-                )}
-
-                <p style={{ color: "#FE5F55" }}>{warning}</p>
-                <TextField
-                  variant="outlined"
-                  style={{ width: "60%", padding: 10, paddingRight: 0 }}
-                  type="text"
-                  name="input"
-                  placeholder="add smth"
-                  value={input}
-                  onChange={(event) => handleInput(event)}
-                  onKeyPress={keyPressed}
-                />
-                <Button
-                  style={{ marginLeft: 0, margin: 10, height: 56 }}
-                  variant="outlined"
-                  disableElevation
-                  onClick={() => updateList()}
-                >
-                  Add
-                </Button>
-              </Card>
-            </Grid>
-            {sorted()}
-          </Grid>
-          <Staples
-            weeklyList={weeklyList}
-            monthlyList={monthlyList}
-            staples={staplesdialog}
-            setWeeklyList={(l) => handleWeeklyList(l)}
-            setMonthlyList={(l) => handleMonthlyList(l)}
-            setStaples={(f) => setStaplesdialog(f)}
-            addStaples={(t) => addStaples(t)}
-          />
-          <Settings
-            settings={settingsdialog}
-            user={user}
-            giveFeedback={(m) => api.giveFeedback(m)}
-            setSettingsdialog={(f) => setSettingsdialog(f)}
-          />
-        </div>
-      ) : (
-        <LoginScreen
-          user={user}
-          validate={(u, p) => validate(u, p)}
-          warning={warning}
-        />
-      )}
-    </div>
+    <Container fluid>
+      {loginScreen === true
+        ? showLoginScreen()
+        : filterItem === null
+        ? staplesMenu === false
+          ? mapFilters()
+          : showStaplesMenu()
+        : showFilterMenu()}
+    </Container>
   );
 };
-
 export default App;
+
+/**{showStaplesMenu()}
+          {showWarning()}{showFilterMenu()} */
