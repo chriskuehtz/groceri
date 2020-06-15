@@ -121,9 +121,9 @@ const App = () => {
     } else if (name === "deleteMonthly") {
       data.list = read.data.monthly.filter((e) => e !== parameter);
     } else if (name === "addWeekly") {
-      data.weekly = parameter;
+      data.weekly = read.data.weekly.concat(parameter);
     } else if (name === "addMonthly") {
-      data.monthly = parameter;
+      data.monthly = read.data.monthly.concat(parameter);
     } else if (name === "listWeekly" || name === "listMonthly") {
       data.list = read.data.list.concat(
         parameter.filter((m) => read.data.list.includes(m) === false)
