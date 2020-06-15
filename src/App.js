@@ -97,6 +97,8 @@ const App = () => {
     }*/
   };
   const triggerUpdate = async (parameter, name) => {
+    console.log(parameter);
+    const read = await api.read(user);
     let data = {
       users: ["chris", "icia"],
       list: list,
@@ -108,18 +110,25 @@ const App = () => {
     };
     if (name === "list") {
       data.list = parameter;
+    } else if (name === "addItem") {
+      data.list = read.data.list.concat(parameter);
+    } else if (name === "deleteItem") {
+      data.list = read.data.list.filter((e) => e !== parameter);
+    } else if (name === "deleteWeekly") {
+      data.list = read.data.weekly.filter((e) => e !== parameter);
+    } else if (name === "deleteMonthly") {
+      data.list = read.data.monthly.filter((e) => e !== parameter);
+    } else if (name === "addWeekly") {
+      data.weekly = parameter;
+    } else if (name === "addMonthly") {
+      data.monthly = parameter;
+    } else if (name === "listWeekly" || name === "listMonthly") {
+      data.list = read.data.list.concat(
+        parameter.filter((m) => read.data.list.includes(m) === false)
+      );
+      data.weeklyTimer = new Date().getTime();
     } else if (name === "filters") {
       data.filters = parameter;
-    } else if (name === "weekly") {
-      data.weekly = parameter;
-    } else if (name === "monthly") {
-      data.monthly = parameter;
-    } else if (name === "listWeekly") {
-      data.list = parameter;
-      data.weeklyTimer = new Date().getTime();
-    } else if (name === "listMonthly") {
-      data.list = parameter;
-      data.monthlyTimer = new Date().getTime();
     }
     const result = await api.update({
       ref: ref,
@@ -145,7 +154,6 @@ const App = () => {
       setWarning("wrong user or password");
     }
   };
-
   //add an item to the list
   const addItem = () => {
     //perform api.update with the list with the new item
@@ -157,10 +165,10 @@ const App = () => {
     const concatItem = () => {
       if (item !== "") {
         let temp = item.toLowerCase();
-        let tempList = list.concat(temp);
+        //let tempList = list.concat(temp);
         setItem("");
         setWarning("");
-        triggerUpdate(tempList, "list");
+        triggerUpdate(temp, "addItem");
       } else {
         setWarning("you cannot add an empty Item");
       }
@@ -192,18 +200,18 @@ const App = () => {
   //perform api.update with the list without the deleted item
   const deleteItem = (item) => {
     console.log(item);
-    let temp = list.filter((e) => e !== item);
-    triggerUpdate(temp, "list");
+    //let temp = list.filter((e) => e !== item);
+    triggerUpdate(item, "deleteItem");
   };
   const deleteWeekly = (item) => {
     console.log(item);
     let temp = weekly.filter((e) => e !== item);
-    triggerUpdate(temp, "weekly");
+    triggerUpdate(item, "deleteWeekly");
   };
   const deleteMonthly = (item) => {
     console.log(item);
-    let temp = monthly.filter((e) => e !== item);
-    triggerUpdate(temp, "monthly");
+    //let temp = monthly.filter((e) => e !== item);
+    triggerUpdate(item, "deleteMonthly");
   };
   //map the list according to filter category
   const mapFilters = () => {
@@ -317,32 +325,32 @@ const App = () => {
   };
   const showStaplesMenu = () => {
     const concatStaple = (s) => {
-      if (s === "weekly" && weeklyItem !== "") {
+      if (s === "addWeekly" && weeklyItem !== "") {
         let temp = weeklyItem.toLowerCase();
-        let tempList = weekly;
-        tempList = tempList.concat(temp);
+        //let tempList = weekly;
+        //tempList = tempList.concat(temp);
         setWeeklyItem("");
         setWarning("");
-        triggerUpdate(tempList, s);
-      } else if (s === "monthly" && monthlyItem !== "") {
+        triggerUpdate(temp, s);
+      } else if (s === "addMonthly" && monthlyItem !== "") {
         let temp = monthlyItem.toLowerCase();
-        let tempList = monthly;
-        tempList = tempList.concat(temp);
+        //let tempList = monthly;
+        //tempList = tempList.concat(temp);
         setMonthlyItem("");
         setWarning("");
-        triggerUpdate(tempList, s);
+        triggerUpdate(temp, s);
       } else {
         setWarning("you cannot add an empty Item");
       }
     };
     const keyPressedWeekly = (event) => {
       if (event.key === "Enter" && weeklyItem !== "") {
-        concatStaple("weekly");
+        concatStaple("addWeekly");
       }
     };
     const keyPressedMonthly = (event) => {
       if (event.key === "Enter" && monthlyItem !== "") {
-        concatStaple("monthly");
+        concatStaple("addMonthly");
       }
     };
 
@@ -362,7 +370,7 @@ const App = () => {
               outline
               color="dark"
               style={functionButton}
-              onClick={() => concatStaple("weekly")}
+              onClick={() => concatStaple("addWeekly")}
             >
               Add
             </Button>
@@ -385,12 +393,7 @@ const App = () => {
               outline
               color="dark"
               style={functionButton}
-              onClick={() =>
-                triggerUpdate(
-                  list.concat(weekly.filter((w) => list.includes(w) === false)),
-                  "listWeekly"
-                )
-              }
+              onClick={() => triggerUpdate(weekly, "listWeekly")}
             >
               Add all weekly Staples
             </Button>
@@ -414,7 +417,7 @@ const App = () => {
               outline
               color="dark"
               style={functionButton}
-              onClick={() => concatStaple("monthly")}
+              onClick={() => concatStaple("addMonthly")}
             >
               Add
             </Button>
@@ -437,14 +440,7 @@ const App = () => {
               outline
               color="dark"
               style={functionButton}
-              onClick={() =>
-                triggerUpdate(
-                  list.concat(
-                    monthly.filter((m) => list.includes(m) === false)
-                  ),
-                  "listMonthly"
-                )
-              }
+              onClick={() => triggerUpdate(monthly, "listMonthly")}
             >
               Add all monthly Staples
             </Button>
