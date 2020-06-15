@@ -13,6 +13,7 @@ import bcrypt from "bcryptjs";
 
 const App = () => {
   const [user, setUser] = useState("");
+  const [users, setUsers] = useState("");
   const [password, setPassword] = useState("");
   const [ref, setRef] = useState("");
   const [loginScreen, setLoginScreen] = useState(true);
@@ -76,6 +77,7 @@ const App = () => {
   const fetchData = async (u) => {
     const result = await api.read(u);
     console.log(result);
+    setUsers(result.data.users);
     setRef(result.data.ref);
     setList(result.data.list);
     setFilters(result.data.filters);
@@ -100,7 +102,7 @@ const App = () => {
     console.log(parameter);
     const read = await api.read(user);
     let data = {
-      users: ["chris", "icia"],
+      users: users,
       list: list,
       weekly: weekly,
       monthly: monthly,
