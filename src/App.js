@@ -15,12 +15,12 @@ const App = () => {
   const [user, setUser] = useState("");
   const [users, setUsers] = useState("");
   const [password, setPassword] = useState("");
+  const [warning, setWarning] = useState("");
   const [ref, setRef] = useState("");
   const [loginScreen, setLoginScreen] = useState(true);
   const [list, setList] = useState([]);
   const [filters, setFilters] = useState([]);
   const [item, setItem] = useState("");
-  const [warning, setWarning] = useState("");
   const [filterItem, setFilterItem] = useState(null);
   const [staplesMenu, setStaplesMenu] = useState(false);
   const [weekly, setWeekly] = useState([]);
@@ -492,20 +492,12 @@ const App = () => {
               >
                 Log in
               </Button>
-              <p>{warning}</p>
+              <h3 style={{ color: "red" }}>{warning}</h3>
             </Card>
           </Col>
         </Row>
       );
     } else return "";
-  };
-  //return the warning, or "nothing"
-  const showWarning = () => {
-    return (
-      <Col style={{ color: "red" }} xs="12">
-        {warning}
-      </Col>
-    );
   };
 
   //return of App
