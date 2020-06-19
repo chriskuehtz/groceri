@@ -147,6 +147,7 @@ const App = () => {
   };
   const validate = async (u, p) => {
     const result = await api.validate(u);
+    console.log(result);
     if (bcrypt.compareSync(p, result.hash)) {
       console.log("password correct");
       fetchData(u);
