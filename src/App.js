@@ -98,9 +98,13 @@ const App = () => {
       );
     }*/
   };
+  //trigger netlify function to perform the database update
   const triggerUpdate = async (parameter, name) => {
     console.log(parameter);
-    const read = await api.read(user);
+    //fetch the latest state of the db(if you share the list with someone)
+    if (users.length > 1) {
+      const read = await api.read(user);
+    }
     let data = {
       users: users,
       list: list,
@@ -110,6 +114,7 @@ const App = () => {
       monthlyTimer: monthlyTimer,
       filters: filters,
     };
+
     if (name === "list") {
       data.list = parameter;
     } else if (name === "addItem") {
@@ -291,6 +296,7 @@ const App = () => {
     setFilterItem(null);
     triggerUpdate(tempFilters, "filters");
   };
+  //the actual jsx components: (all in one file because it is not a lot of code)
   const showFilterMenu = () => {
     if (filterItem !== null) {
       return (
@@ -501,7 +507,7 @@ const App = () => {
     } else return "";
   };
 
-  //return of App
+  //return of App, "routing" through ternary operator
   return (
     <Container fluid>
       {loginScreen === true
@@ -515,6 +521,3 @@ const App = () => {
   );
 };
 export default App;
-
-/**{showStaplesMenu()}
-          {showWarning()}{showFilterMenu()} */

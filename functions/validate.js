@@ -12,14 +12,13 @@ exports.handler = (event, context) => {
   return client
     .query(q.Get(q.Match(q.Index("u"), data.user)))
     .then((response) => {
-      console.log("user and password valid");
+      console.log("user valid");
       console.log(response);
       return {
         message: "valid",
         statusCode: 200,
         body: JSON.stringify({
           hash: response.data.hash,
-          tutorial: response.data.tutorial,
         }),
       };
     })
