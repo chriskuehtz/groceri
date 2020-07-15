@@ -102,9 +102,9 @@ const App = () => {
   const triggerUpdate = async (parameter, name) => {
     console.log(parameter);
     //fetch the latest state of the db(if you share the list with someone)
-    if (users.length > 1) {
-      const read = await api.read(user);
-    }
+
+    const read = await api.read(user);
+
     let data = {
       users: users,
       list: list,
