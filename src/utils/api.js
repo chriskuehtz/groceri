@@ -5,6 +5,7 @@ const validate = (u) => {
     body: JSON.stringify({ user: u }),
     method: "POST",
   }).then((response) => {
+    console.log(response.json);
     return response.json();
   });
 };

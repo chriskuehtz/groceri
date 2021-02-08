@@ -151,6 +151,7 @@ const App = () => {
     setMonthlyTimer(result.data.monthlyTimer);
   };
   const validate = async (u, p) => {
+    console.log(u,p);
     const result = await api.validate(u);
     console.log(result);
     if (bcrypt.compareSync(p, result.hash)) {
@@ -476,7 +477,7 @@ const App = () => {
       return (
         <Row style={fullscreen}>
           <Col xs="12">
-            <Card style={{ marginTop: "20%", width: "90%", marginLeft: "5%" }}>
+            <Card style={{ marginTop: "5%", width: "90%", marginLeft: "5%" }}>
               <h1 style={cardHeader}>GROCERI</h1>
               <h4 style={cardHeader}>organize your grocery shopping!</h4>
               <Input
