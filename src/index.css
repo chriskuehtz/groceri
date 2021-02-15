@@ -1,0 +1,43 @@
+body {
+  --main-color: rgb(70, 70, 70);
+  color: var(--main-color);
+}
+.container {
+  max-width: 1440px;
+  margin: auto;
+}
+.smallCard {
+  margin-top: 1rem;
+  padding: 1rem;
+}
+.bigCard {
+  margin-top: 1rem;
+  padding: 1rem;
+}
+.loginCard {
+  margin-top: 1rem;
+  padding: 1rem;
+}
+.cardHeader {
+  color: var(--main-color);
+}
+
+.itemButton {
+  width: 80%;
+}
+.deleteButton {
+  width: 20%;
+}
+
+.functionButton {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+.categoryButton {
+  margin-top: 1rem;
+  background-color: white;
+}
+
+.warning {
+  color: red;
+}

@@ -30,49 +30,6 @@ const App = () => {
   const [weeklyTimer, setWeeklyTimer] = useState("");
   const [monthlyTimer, setMonthlyTimer] = useState("");
 
-  //styles:
-  const fullscreen = {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    minHeight: "100vh",
-    heigth: "100%",
-    width: "100vw",
-    backgroundColor: "#264653",
-  };
-  const card = {
-    backgroundColor: "white",
-    width: "96%",
-    margin: "2%",
-  };
-  const cardHeader = {
-    marginLeft: "2%",
-  };
-  const bigCard = {
-    backgroundColor: "white",
-    margin: "2%",
-  };
-  const inputElement = {
-    width: "96%",
-    fontSize: "4vh",
-    margin: "2%",
-  };
-  const functionButton = {
-    width: "96%",
-    fontSize: "4vh",
-    margin: "2%",
-  };
-  const categoryButton = {
-    backgroundColor: "white",
-    color: "black",
-    width: "96%",
-    fontSize: "4vh",
-    margin: "2%",
-  };
-  const buttonGroup = { width: "96%", margin: "2%" };
-  const itemButton = { width: "80%" };
-  const deleteButton = { width: "20%" };
-
   //load the data upon login
   const fetchData = async (u) => {
     const result = await api.read(u);
@@ -151,7 +108,7 @@ const App = () => {
     setMonthlyTimer(result.data.monthlyTimer);
   };
   const validate = async (u, p) => {
-    console.log(u,p);
+    console.log(u, p);
     const result = await api.validate(u);
     console.log(result);
     if (bcrypt.compareSync(p, result.hash)) {
@@ -185,10 +142,10 @@ const App = () => {
     //return the input field
     return (
       <Col xs="12">
-        <Card style={bigCard}>
-          <h1 style={cardHeader}>GROCERI</h1>
+        <Card className="bigCard">
+          <h1 className="cardHeader">GROCERI</h1>
           <Input
-            style={inputElement}
+            className="inputElement"
             placeholder="add smth"
             value={item}
             onChange={(event) => setItem(event.target.value)}
@@ -197,7 +154,8 @@ const App = () => {
           <Button
             outline
             color="dark"
-            style={functionButton}
+            className="functionButton"
+            block
             onClick={() => concatItem()}
           >
             Add
@@ -243,20 +201,20 @@ const App = () => {
       }
     });
     return (
-      <Row style={fullscreen}>
+      <Row>
         {addItem()}{" "}
         {tempFilters
           .filter((f) => f.length > 1)
           .map((f) => (
-            <Col xs="12" lg="6">
-              <Card style={card}>
-                <h3 style={cardHeader}>{f[0]}</h3>
+            <Col xs="12" md="6" lg="4">
+              <Card className="smallCard">
+                <h3 className="cardHeader">{f[0]}</h3>
                 {f.slice(1).map((e) => (
-                  <ButtonGroup outline style={buttonGroup}>
+                  <ButtonGroup outline className="buttonGroup">
                     <Button
                       outline
                       color="dark"
-                      style={itemButton}
+                      className="itemButton"
                       onClick={() => setFilterItem(e)}
                     >
                       {e}
@@ -264,7 +222,7 @@ const App = () => {
                     <Button
                       outline
                       color="danger"
-                      style={deleteButton}
+                      className="deleteButton"
                       onClick={() => deleteItem(e)}
                     >
                       X
@@ -277,7 +235,8 @@ const App = () => {
         <Col xs="12">
           <Button
             color="danger"
-            style={functionButton}
+            className="functionButton"
+            block
             onClick={() => setStaplesMenu(true)}
           >
             Staples
@@ -297,31 +256,39 @@ const App = () => {
     setFilterItem(null);
     triggerUpdate(tempFilters, "filters");
   };
+
   //the actual jsx components: (all in one file because it is not a lot of code)
   const showFilterMenu = () => {
     if (filterItem !== null) {
       return (
-        <Row style={fullscreen}>
+        <Row>
           <Col xs="12">
-            <Card style={card}>
-              <h1 style={cardHeader}>{filterItem}</h1>
+            <Card className="smallCard">
+              <h1 className="cardHeader">{filterItem}</h1>
+              <Row>
+                {filters.map((f, i) => (
+                  <Col xs="12" md="4" xl="3" className="category">
+                    <Button
+                      className="categoryButton"
+                      block
+                      outline
+                      color="dark"
+                      onClick={() => assignFilter(filterItem, i)}
+                    >
+                      <span>{f[0]}</span>
+                    </Button>
+                  </Col>
+                ))}
+              </Row>
             </Card>
           </Col>
 
-          {filters.map((f, i) => (
-            <Col xs="12" lg="2">
-              <Button
-                style={categoryButton}
-                onClick={() => assignFilter(filterItem, i)}
-              >
-                <p>{f[0]}</p>
-              </Button>
-            </Col>
-          ))}
           <Col xs="12">
             <Button
               color="danger"
-              style={functionButton}
+              className="functionButton"
+              block
+              block
               onClick={() => setFilterItem(null)}
             >
               Back
@@ -365,12 +332,12 @@ const App = () => {
     };
 
     return (
-      <Row style={fullscreen}>
+      <Row>
         <Col xs="12">
-          <Card style={card}>
-            <h1 style={cardHeader}>Weekly</h1>
+          <Card className="smallCard">
+            <h1 className="cardHeader">Weekly</h1>
             <Input
-              style={inputElement}
+              className="inputElement"
               placeholder="add smth"
               value={weeklyItem}
               onChange={(event) => setWeeklyItem(event.target.value)}
@@ -379,20 +346,21 @@ const App = () => {
             <Button
               outline
               color="dark"
-              style={functionButton}
+              className="functionButton"
+              block
               onClick={() => concatStaple("addWeekly")}
             >
               Add
             </Button>
             {weekly.map((e) => (
-              <ButtonGroup outline style={buttonGroup}>
-                <Button outline color="dark" style={itemButton}>
+              <ButtonGroup outline className="buttonGroup">
+                <Button outline color="dark" className="itemButton">
                   {e}
                 </Button>
                 <Button
                   outline
                   color="danger"
-                  style={deleteButton}
+                  className="deleteButton"
                   onClick={() => deleteWeekly(e)}
                 >
                   X
@@ -402,22 +370,23 @@ const App = () => {
             <Button
               outline
               color="dark"
-              style={functionButton}
+              className="functionButton"
+              block
               onClick={() => triggerUpdate(weekly, "listWeekly")}
             >
               Add all weekly Staples
             </Button>
-            <Button disabled style={categoryButton}>
+            <Button disabled className="categoryButton">
               weekly Staples will be added automatically on{" "}
               {new Date(weeklyTimer + 7 * 24 * 60 * 60 * 1000).toDateString()}
             </Button>
           </Card>
         </Col>
         <Col xs="12">
-          <Card style={card}>
-            <h1 style={cardHeader}>Monthly</h1>
+          <Card className="smallCard">
+            <h1 className="cardHeader">Monthly</h1>
             <Input
-              style={inputElement}
+              className="inputElement"
               placeholder="add smth"
               value={monthlyItem}
               onChange={(event) => setMonthlyItem(event.target.value)}
@@ -426,20 +395,21 @@ const App = () => {
             <Button
               outline
               color="dark"
-              style={functionButton}
+              className="functionButton"
+              block
               onClick={() => concatStaple("addMonthly")}
             >
               Add
             </Button>
             {monthly.map((e) => (
-              <ButtonGroup outline style={buttonGroup}>
-                <Button outline color="dark" style={itemButton}>
+              <ButtonGroup outline className="buttonGroup">
+                <Button outline color="dark" className="itemButton">
                   {e}
                 </Button>
                 <Button
                   outline
                   color="danger"
-                  style={deleteButton}
+                  className="deleteButton"
                   onClick={() => deleteMonthly(e)}
                 >
                   X
@@ -449,12 +419,13 @@ const App = () => {
             <Button
               outline
               color="dark"
-              style={functionButton}
+              className="functionButton"
+              block
               onClick={() => triggerUpdate(monthly, "listMonthly")}
             >
               Add all monthly Staples
             </Button>
-            <Button disabled style={categoryButton}>
+            <Button disabled className="categoryButton">
               monthly Staples will be added automatically on{" "}
               {new Date(monthlyTimer + 30 * 24 * 60 * 60 * 1000).toDateString()}
             </Button>
@@ -462,7 +433,8 @@ const App = () => {
         </Col>
         <Col xs="12">
           <Button
-            style={functionButton}
+            className="functionButton"
+            block
             color="danger"
             onClick={() => setStaplesMenu(false)}
           >
@@ -475,19 +447,19 @@ const App = () => {
   const showLoginScreen = () => {
     if (loginScreen === true) {
       return (
-        <Row style={fullscreen}>
+        <Row>
           <Col xs="12">
-            <Card style={{ marginTop: "5%", width: "90%", marginLeft: "5%" }}>
-              <h1 style={cardHeader}>GROCERI</h1>
-              <h4 style={cardHeader}>organize your grocery shopping!</h4>
+            <Card className="loginCard">
+              <h1 className="cardHeader">GROCERI</h1>
+              <h4 className="cardHeader">organize your grocery shopping!</h4>
               <Input
-                style={inputElement}
+                className="inputElement"
                 placeholder="user"
                 value={user}
                 onChange={(event) => setUser(event.target.value)}
               />
               <Input
-                style={inputElement}
+                className="inputElement"
                 type="password"
                 placeholder="password"
                 value={password}
@@ -495,12 +467,13 @@ const App = () => {
               />
               <Button
                 color="danger"
-                style={functionButton}
+                className="functionButton"
+                block
                 onClick={() => validate(user, password)}
               >
                 Log in
               </Button>
-              <h3 style={{ color: "red" }}>{warning}</h3>
+              <h3 className="warning">{warning}</h3>
             </Card>
           </Col>
         </Row>
@@ -510,7 +483,7 @@ const App = () => {
 
   //return of App, "routing" through ternary operator
   return (
-    <Container fluid>
+    <Container className="box">
       {loginScreen === true
         ? showLoginScreen()
         : filterItem === null
